@@ -1,62 +1,87 @@
 import React from 'react';
-import { Home, FileText, Users, Bell, Bot, User, MessageSquare, LogOut } from 'lucide-react';
+import Image from 'next/image';
+import { Home, AlertTriangle, Users, Bell, Bot, User, Phone } from 'lucide-react';
 
 const Navbar = () => {
   return (
-    <nav className="w-52 min-h-screen bg-gradient-to-b from-green-50 via-green-50 to-pink-50 p-6 flex flex-col">
+    <nav className="w-64 min-h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col">
       {/* Logo */}
-      <div className="mb-8 flex items-center gap-2">
-        <div className="text-2xl">🌿</div>
-        <h1 className="text-xl font-semibold text-gray-800">EcoAction</h1>
+      <div className="p-6">
+        <div className="flex items-center gap-3">
+          <Image 
+            src="/EcoActionlogo-removebg-preview.png" 
+            alt="EcoAction Hub Logo" 
+            width={48}
+            height={48}
+            className="object-contain"
+          />
+          <span className="text-xl font-semibold text-gray-900">EcoAction</span>
+        </div>
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 space-y-3">
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-white shadow-sm text-left text-gray-700 text-sm">
-          <Home size={18} className="text-gray-800" />
-          <span className="font-medium">Dashboard</span>
-        </button>
-
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-white shadow-sm text-left text-gray-700 text-sm">
-          <FileText size={18} className="text-gray-800" />
-          <span className="font-medium">Report Issue</span>
-        </button>
-
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-white shadow-sm text-left text-gray-700 text-sm">
-          <Users size={18} className="text-gray-800" />
-          <span className="font-medium">Community Actions</span>
-        </button>
-
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-white shadow-sm text-left text-gray-700 text-sm">
-          <Bell size={18} className="text-gray-800" />
-          <span className="font-medium">Emergency Alerts</span>
-        </button>
-
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-white shadow-sm text-left text-gray-700 text-sm">
-          <Bot size={18} className="text-gray-800" />
-          <span className="font-medium">AI Assistant</span>
-        </button>
-
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-white shadow-sm text-left text-gray-700 text-sm">
-          <User size={18} className="text-gray-800" />
-          <span className="font-medium">profile</span>
-        </button>
-
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-md bg-white shadow-sm text-left text-gray-700 text-sm">
-          <MessageSquare size={18} className="text-gray-800" />
-          <span className="font-medium">Contact</span>
-        </button>
+      <div className="flex-1 px-4">
+        <ul className="space-y-3">
+          <li>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+              <Home className="w-5 h-5" />
+              <span className="font-medium">Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+              <AlertTriangle className="w-5 h-5" />
+              <span className="font-medium">Report Issue</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+              <Users className="w-5 h-5" />
+              <span className="font-medium">Community Actions</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+              <Bell className="w-5 h-5" />
+              <span className="font-medium">Emergency Alerts</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+              <Bot className="w-5 h-5" />
+              <span className="font-medium">AI Assistant</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+              <User className="w-5 h-5" />
+              <span className="font-medium">Profile</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" className="flex items-center gap-3 px-4 py-3 text-gray-700 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+              <Phone className="w-5 h-5" />
+              <span className="font-medium">Contact</span>
+            </a>
+          </li>
+        </ul>
       </div>
 
       {/* User Profile & Logout */}
-      <div className="mt-auto pt-8 flex flex-col items-center gap-2">
-        <div className="w-14 h-14 rounded-full bg-gray-300 flex items-center justify-center mb-1">
-          <User size={28} className="text-gray-500" />
+      <div className="p-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">LC</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-900">Lydia Chen</p>
+            </div>
+          </div>
+          <button className="w-full text-left text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
+            Logout
+          </button>
         </div>
-        <span className="text-sm text-gray-600">Lydia Chen</span>
-        <button className="mt-2 text-sm text-gray-600 underline">
-          Logout
-        </button>
       </div>
     </nav>
   );
