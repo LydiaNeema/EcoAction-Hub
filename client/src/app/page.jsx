@@ -242,7 +242,7 @@ export default function Home() {
             © 2025 EcoAction Hub. Building sustainable communities together
           </p>
         </div>
-      </footer>
+      </footer
     </div>
   );
 }
