@@ -1,24 +1,49 @@
 from flask import Flask, jsonify
-from app.config import Config
-from app.extensions import db, cors, migrate
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
-def create_app(config_class=Config):
+from .extensions import db, migrate, api
+from .config import DevelopmentConfig
+
+
+def create_app():
     app = Flask(__name__)
-    app.config.from_object(config_class)
-    
-    # Initialize extensions
+
+    # ------------------- Config -------------------
+    app.config.from_object(DevelopmentConfig)
+
+    # ------------------- Extensions -------------------
     db.init_app(app)
-    cors.init_app(app)
     migrate.init_app(app, db)
+    JWTManager(app)
+    api.init_app(app)
+    CORS(app)
+
+    # ------------------- Import models (for Alembic) -------------------
+    from app.models.profile import Profile
+    from app.models.achievements import Achievement, UserAchievement
     
-    # Root route
-    @app.route('/')
-    def index():
+
+    # ------------------- Register blueprints -------------------
+    from app.routes.profile import profile_bp
+    app.register_blueprint(profile_bp, url_prefix='/api/profile')
+    
+    # Register emergency routes if they exist
+    try:
+        from app.routes import emergency
+        app.register_blueprint(emergency.bp)
+    except ImportError:
+        pass  # Emergency routes not available yet
+    
+    # ------------------- Default route -------------------
+    @app.route("/")
+    def home():
         return jsonify({
             'message': 'EcoAction Hub API',
             'version': '1.0.0',
             'status': 'running',
             'endpoints': {
+                'profile': '/api/profile',
                 'emergency_alerts': '/api/emergency/alerts',
                 'priority_alerts': '/api/emergency/alerts/priority',
                 'insights': '/api/emergency/insights',
@@ -26,9 +51,4 @@ def create_app(config_class=Config):
                 'reports': '/api/emergency/reports'
             }
         }), 200
-    
-    # Register blueprints
-    from app.routes import emergency
-    app.register_blueprint(emergency.bp)
-    
     return app

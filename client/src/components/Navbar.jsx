@@ -1,14 +1,17 @@
 import React from 'react';
-import Image from 'next/image';
-import { Home, AlertTriangle, Users, Bell, Bot, User, Phone } from 'lucide-react';
+import { Home, AlertTriangle, Users, Bell, Bot, User, Phone, TreePine } from 'lucide-react';
 
 const Navbar = () => {
   return (
     <nav className="w-64 min-h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col">
       {/* Logo */}
-      <div className="mb-8 flex items-center gap-2 bg-white p-4">
-        <img src="/EcoActionlogo-removebg-preview.png" alt="EcoAction Logo" className="w-10 h-10" />
-        <h1 className="text-xl font-semibold text-gray-800">EcoAction</h1>
+      <div className="p-6">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+            <TreePine className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-xl font-semibold text-gray-900">EcoAction</span>
+        </div>
       </div>
 
       {/* Menu Items */}
