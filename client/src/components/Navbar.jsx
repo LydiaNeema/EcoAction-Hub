@@ -6,17 +6,9 @@ const Navbar = () => {
   return (
     <nav className="w-64 min-h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col">
       {/* Logo */}
-      <div className="p-6">
-        <div className="flex items-center gap-3">
-          <Image 
-            src="/EcoActionlogo-removebg-preview.png" 
-            alt="EcoAction Hub Logo" 
-            width={48}
-            height={48}
-            className="object-contain"
-          />
-          <span className="text-xl font-semibold text-gray-900">EcoAction</span>
-        </div>
+      <div className="mb-8 flex items-center gap-2 bg-white p-4">
+        <img src="/EcoActionlogo-removebg-preview.png" alt="EcoAction Logo" className="w-10 h-10" />
+        <h1 className="text-xl font-semibold text-gray-800">EcoAction</h1>
       </div>
 
       {/* Menu Items */}
