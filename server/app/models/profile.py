@@ -26,9 +26,8 @@ class Profile(db.Model, SerializerMixin):
     alerts_this_month = db.Column(db.Integer, default=0)
     trees_this_month = db.Column(db.Integer, default=0)
 
-    # REMOVED user relationship for now to avoid circular imports
-    # user = db.relationship("User", back_populates="profile")
-    achievements = db.relationship("Achievement", secondary="user_achievemnets", back_populates="users")
+    # user = db.relationship("User", back_populates="profile")  # Commented out - User model not yet implemented
+    achievements = db.relationship("Achievement", secondary="user_achievements", back_populates="users")
 
     # Adding serializer rules
     serialize_rules = ('-achievements',)  # Simplified for now
@@ -37,7 +36,7 @@ class Profile(db.Model, SerializerMixin):
         """Convert profile to dictionary for API responses"""
         return {
             "id": self.id,
-            "user_id": self.user_id,
+            # "user_id": self.user_id,  # Commented out since user_id field is commented
             "full_name": self.full_name,
             "bio": self.bio,
             "county": self.county,
