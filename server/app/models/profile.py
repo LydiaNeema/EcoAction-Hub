@@ -6,7 +6,7 @@ class Profile(db.Model,SerializerMixin):
     __tablename__ ="profiles"
 
     id = db.Column(db.Integer,primary_key = True)
-    #user_id = db.Column(db.Integer,db.ForeignKey("users.id"),nullable=False,unique = True)
+    user_id = db.Column(db.Integer,db.ForeignKey("users.id"),nullable=False,unique = True)
     full_name = db.Column(db.String(120))
     bio = db.Column(db.Text,default = "")
     county =db.Column(db.String(100))
@@ -24,10 +24,11 @@ class Profile(db.Model,SerializerMixin):
     #Monthly statistics - for "+X this month"
     issues_this_month = db.Column(db.Integer,default =0)
     alerts_this_month = db.Column(db.Integer, default = 0)
+    impact_this_month = db.Column(db.Integer, default = 0)
     trees_this_month = db.Column(db.Integer, default = 0)
 
     user = db.relationship("User",back_populates="profile")
-    achievements = db.relationship("Achievement",secondary="user_achievemnets",back_populates = "users")
+    achievements = db.relationship("Achievement",secondary="user_achievements",back_populates = "users")
 
     #adding serializer rules
     serialize_rules =('-user.profile','-user.reports','-user.actions')

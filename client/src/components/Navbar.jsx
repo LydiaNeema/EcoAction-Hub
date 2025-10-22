@@ -1,7 +1,11 @@
+"use client";
 import React from 'react';
 import { Home, AlertTriangle, Users, Bell, Bot, User, Phone, TreePine } from 'lucide-react';
+import { clearToken } from '@/utils/auth';
+import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
+  const router = useRouter();
   return (
     <nav className="w-64 min-h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col">
       {/* Logo */}
@@ -73,7 +77,7 @@ const Navbar = () => {
               <p className="text-sm font-medium text-gray-900">Lydia Chen</p>
             </div>
           </div>
-          <button className="w-full text-left text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
+          <button onClick={() => { clearToken(); router.replace('/auth/signin'); }} className="w-full text-left text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
             Logout
           </button>
         </div>
