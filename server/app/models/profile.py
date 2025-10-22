@@ -27,11 +27,11 @@ class Profile(db.Model,SerializerMixin):
     impact_this_month = db.Column(db.Integer, default = 0)
     trees_this_month = db.Column(db.Integer, default = 0)
 
-    user = db.relationship("User",back_populates="profile")
+    # user = db.relationship("User",back_populates="profile")  # Commented out - User model not yet implemented
     achievements = db.relationship("Achievement",secondary="user_achievements",back_populates = "users")
 
     #adding serializer rules
-    serialize_rules =('-user.profile','-user.reports','-user.actions')
+    # serialize_rules =('-user.profile','-user.reports','-user.actions')  # Commented out - User model not yet implemented
 
     def get_formatted_location(self):
         if self.area and self.county:
