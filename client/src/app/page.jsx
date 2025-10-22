@@ -6,7 +6,7 @@ import { AlertTriangle, Bell, Zap } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#F6FFF8]">
       {/* Navigation */}
       <nav className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -18,18 +18,18 @@ export default function Home() {
               </h1>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/auth" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
+              <Link href="/auth/signin" className="text-gray-700 hover:text-gray-900 text-sm font-medium">
                 Login
               </Link>
-              <Link href="/auth" className="bg-[#16A34A] text-white px-5 py-2 rounded-md hover:bg-[#15803D] transition-colors text-sm font-medium">
-                Get Started
+              <Link href="/auth/signup" className="bg-[#16A34A] text-white px-5 py-2 rounded-md hover:bg-[#15803D] transition-colors text-sm font-medium">
+                Sign Up
               </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="relative bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('/BG.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+      <div className="relative bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url('/BG.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
       {/* Hero Section */}
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
@@ -50,7 +50,7 @@ export default function Home() {
             <Link href="/community" className="border-2 border-gray-800 text-gray-800 px-8 py-3 rounded-md hover:bg-gray-800 hover:text-white transition-all font-medium">
               Learn More
             </Link>
-            <Link href="/auth" className="bg-[#16A34A] text-white px-8 py-3 rounded-md hover:bg-[#15803D] transition-all font-medium">
+            <Link href="/auth/signup" className="bg-[#16A34A] text-white px-8 py-3 rounded-md hover:bg-[#15803D] transition-all font-medium">
               Get Started
             </Link>
           </div>
@@ -229,7 +229,7 @@ export default function Home() {
           <p className="text-lg text-gray-600 mb-8">
             Join your community in taking action on climate issues today
           </p>
-          <Link href="/auth" className="inline-block bg-[#16A34A] text-white px-8 py-3 rounded-md hover:bg-[#15803D] transition-all font-medium">
+          <Link href="/auth/signup" className="inline-block bg-[#16A34A] text-white px-8 py-3 rounded-md hover:bg-[#15803D] transition-all font-medium">
             Get Started Now
           </Link>
         </div>

@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.models.profile import Profile
-#from app.models.auth import User
+from app.models.auth import User
 from app.models.achievements import Achievement, UserAchievement  # Fixed import
 from datetime import datetime
 
