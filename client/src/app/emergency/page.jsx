@@ -199,7 +199,7 @@ export default function EmergencyPage() {
           <div className="flex gap-4 mb-6">
             <div className="flex-shrink-0">
               <div className="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-white" strokeWidth={2.5} />
+                <Icon icon="mdi:alert-circle" className="w-8 h-8 text-white" />
               </div>
             </div>
             <div>
@@ -251,7 +251,7 @@ export default function EmergencyPage() {
               <div key={alert.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className={`${alert.color} bg-white p-2 rounded-lg`}>
-                    <alert.icon className="w-6 h-6" />
+                    <Icon icon={alert.icon} className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 text-sm">{alert.type}</h3>
@@ -283,7 +283,7 @@ export default function EmergencyPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
-              <Bell className="w-6 h-6 text-white" />
+              <Icon icon="mdi:bell-alert" className="w-6 h-6 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">Emergency Reporting</h2>
@@ -337,7 +337,7 @@ export default function EmergencyPage() {
                 className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors border border-gray-200"
               >
                 <span className="text-sm">Call</span>
-                <Phone className="w-4 h-4" />
+                <Icon icon="mdi:phone" className="w-4 h-4" />
               </button>
             </div>
           )))
@@ -352,7 +352,7 @@ export default function EmergencyPage() {
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">All Emergency Alerts</h2>
               <button onClick={() => setShowAllAlertsModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+                <Icon icon="mdi:close" className="w-6 h-6" />
               </button>
             </div>
             <div className="p-6 space-y-4">
@@ -364,7 +364,7 @@ export default function EmergencyPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
                         <div className={`${alert.color} bg-white p-2 rounded-lg border border-gray-200`}>
-                          <alert.icon className="w-6 h-6" />
+                          <Icon icon={alert.icon} className="w-6 h-6" />
                         </div>
                         <div className="flex-1">
                           <h3 className="font-bold text-gray-800 text-lg mb-1">{alert.type}</h3>
@@ -403,7 +403,7 @@ export default function EmergencyPage() {
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Report Emergency</h2>
               <button onClick={() => setShowReportModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+                <Icon icon="mdi:close" className="w-6 h-6" />
               </button>
             </div>
             <form onSubmit={handleSubmitReport} className="p-6 space-y-4">
@@ -505,7 +505,7 @@ export default function EmergencyPage() {
                   type="submit"
                   className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
-                  <Send className="w-5 h-5" />
+                  <Icon icon="mdi:send" className="w-5 h-5" />
                   Submit Report
                 </button>
                 <button
@@ -528,7 +528,7 @@ export default function EmergencyPage() {
             <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-800">Detailed Insights</h2>
               <button onClick={() => setShowInsightsModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-6 h-6" />
+                <Icon icon="mdi:close" className="w-6 h-6" />
               </button>
             </div>
             <div className="p-6 space-y-6">
