@@ -1,18 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Icon } from '@iconify/react';
+import { AlertTriangle, Droplets, Thermometer, Bell, Phone, Wind, Flame, X, Send } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
 const API_BASE_URL = 'http://localhost:5000/api/emergency';
 
 // Helper function to get icon based on alert type
 const getAlertIcon = (type) => {
-  if (type.toLowerCase().includes('flood')) return 'mdi:water-alert';
-  if (type.toLowerCase().includes('heat')) return 'mdi:thermometer-alert';
-  if (type.toLowerCase().includes('fire')) return 'mdi:fire-alert';
-  if (type.toLowerCase().includes('air')) return 'mdi:weather-windy';
-  return 'mdi:alert-circle';
+  if (type.toLowerCase().includes('flood')) return Droplets;
+  if (type.toLowerCase().includes('heat')) return Thermometer;
+  if (type.toLowerCase().includes('fire')) return Flame;
+  if (type.toLowerCase().includes('air')) return Wind;
+  return AlertTriangle;
 };
 
 // Helper function to get color based on alert type
