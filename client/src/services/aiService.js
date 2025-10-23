@@ -1,10 +1,10 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api';
+import { endpoints } from './apiConfig';
 
 export const aiService = {
   async chat(message) {
     try {
-      console.log('Making AI chat request to:', `${API_BASE}/ai/chat`);
-      const res = await fetch(`${API_BASE}/ai/chat`, {
+      console.log('Making AI chat request to:', `${endpoints.ai}/chat`);
+      const res = await fetch(`${endpoints.ai}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message })
@@ -18,6 +18,9 @@ export const aiService = {
       if (data.success === false) {
         throw new Error(data.error || 'AI request failed');
       }
+      
+      // Log the response source
+      console.log('Response source:', data.source || 'Unknown');
       return data;
     } catch (error) {
       console.error('AI chat error:', error);

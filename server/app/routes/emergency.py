@@ -8,17 +8,118 @@ from app.schemas.emergency import (
 )
 from marshmallow import ValidationError
 from datetime import datetime
+import os
+import json
 
 bp = Blueprint('emergency', __name__, url_prefix='/api/emergency')
+
+# Initialize OpenAI client
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+openai_client = None
+
+if OPENAI_API_KEY:
+    try:
+        from openai import OpenAI
+        openai_client = OpenAI(api_key=OPENAI_API_KEY)
+    except ImportError:
+        print("Warning: openai package not installed")
+    except Exception as e:
+        print(f"Warning: Could not initialize OpenAI client: {e}")
+
+
+def generate_ai_alerts(location="Nairobi County"):
+    """Generate emergency alerts using OpenAI."""
+    if not openai_client:
+        return None
+    
+    try:
+        completion = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an emergency alert system for climate-related emergencies in Kenya. Generate realistic emergency alerts in JSON format."
+                },
+                {
+                    "role": "user",
+                    "content": f"Generate 3-5 realistic climate emergency alerts for {location}. Include floods, heat waves, air quality, or fire risks. Return as JSON array with fields: type, location, severity (Critical/High/Medium/Low), description, recommendation. Make them realistic for Nairobi's climate."
+                }
+            ],
+            max_tokens=500,
+            temperature=0.8,
+            response_format={"type": "json_object"}
+        )
+        
+        response_text = completion.choices[0].message.content
+        data = json.loads(response_text)
+        
+        # Handle different possible JSON structures
+        if 'alerts' in data:
+            return data['alerts']
+        elif isinstance(data, list):
+            return data
+        else:
+            return list(data.values())[0] if data else []
+            
+    except Exception as e:
+        print(f"OpenAI alert generation error: {e}")
+        return None
+
+
+def generate_ai_insights(location="Nairobi County"):
+    """Generate emergency insights using OpenAI."""
+    if not openai_client:
+        return None
+    
+    try:
+        completion = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an AI assistant providing climate emergency insights for Kenya."
+                },
+                {
+                    "role": "user",
+                    "content": f"Generate emergency insights for {location}. Return JSON with: title (brief alert title), description (2 sentences about current situation), recommendation (safety advice), alertTrend (e.g., 'Increasing'), affectedAreas (number like '8 Locations'), activeAlerts (number 3-10). Make it realistic for Nairobi's climate."
+                }
+            ],
+            max_tokens=300,
+            temperature=0.7,
+            response_format={"type": "json_object"}
+        )
+        
+        insights = json.loads(completion.choices[0].message.content)
+        insights['county'] = location
+        insights['aiStatus'] = 'AI Powered'
+        
+        return insights
+            
+    except Exception as e:
+        print(f"OpenAI insights generation error: {e}")
+        return None
+
 
 # Get all active emergency alerts
 @bp.route('/alerts', methods=['GET'])
 def get_alerts():
     try:
+        # Try to generate AI alerts first
+        ai_alerts = generate_ai_alerts()
+        
+        if ai_alerts:
+            return jsonify({
+                'success': True,
+                'data': ai_alerts,
+                'source': 'ai'
+            }), 200
+        
+        # Fallback to database
         alerts = EmergencyAlert.query.filter_by(is_active=True).order_by(EmergencyAlert.created_at.desc()).all()
         return jsonify({
             'success': True,
-            'data': emergency_alerts_schema.dump(alerts)
+            'data': emergency_alerts_schema.dump(alerts),
+            'source': 'database'
         }), 200
     except Exception as e:
         return jsonify({
@@ -30,6 +131,19 @@ def get_alerts():
 @bp.route('/alerts/priority', methods=['GET'])
 def get_priority_alerts():
     try:
+        # Try to generate AI alerts first
+        ai_alerts = generate_ai_alerts()
+        
+        if ai_alerts:
+            # Filter for high priority
+            priority_alerts = [alert for alert in ai_alerts if alert.get('severity') in ['High', 'Critical']]
+            return jsonify({
+                'success': True,
+                'data': priority_alerts[:5],
+                'source': 'ai'
+            }), 200
+        
+        # Fallback to database
         alerts = EmergencyAlert.query.filter(
             EmergencyAlert.is_active == True,
             EmergencyAlert.severity.in_(['High', 'Critical'])
@@ -37,7 +151,8 @@ def get_priority_alerts():
         
         return jsonify({
             'success': True,
-            'data': emergency_alerts_schema.dump(alerts)
+            'data': emergency_alerts_schema.dump(alerts),
+            'source': 'database'
         }), 200
     except Exception as e:
         return jsonify({
@@ -49,21 +164,27 @@ def get_priority_alerts():
 @bp.route('/insights', methods=['GET'])
 def get_insights():
     try:
-        # Get active high severity alerts
+        # Try to generate AI insights first
+        ai_insights = generate_ai_insights()
+        
+        if ai_insights:
+            return jsonify({
+                'success': True,
+                'data': ai_insights,
+                'source': 'ai'
+            }), 200
+        
+        # Fallback to database-based insights
         high_severity_alerts = EmergencyAlert.query.filter(
             EmergencyAlert.is_active == True,
             EmergencyAlert.severity.in_(['High', 'Critical'])
         ).all()
         
-        # Get total active alerts
         total_active = EmergencyAlert.query.filter_by(is_active=True).count()
-        
-        # Get unique affected areas
         affected_areas = db.session.query(EmergencyAlert.affected_areas).filter(
             EmergencyAlert.is_active == True
         ).distinct().count()
         
-        # Build insights response
         if high_severity_alerts:
             alert_types = [alert.type for alert in high_severity_alerts]
             locations = list(set([alert.location for alert in high_severity_alerts]))
@@ -94,7 +215,8 @@ def get_insights():
         
         return jsonify({
             'success': True,
-            'data': insights
+            'data': insights,
+            'source': 'database'
         }), 200
     except Exception as e:
         return jsonify({
