@@ -29,8 +29,25 @@ class DashboardStats(db.Model, SerializerMixin):
     
     serialize_rules = ('-user',)
     
+    def to_dict(self):
+        """Convert dashboard stats to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'total_issues_reported': self.total_issues_reported,
+            'total_actions_joined': self.total_actions_joined,
+            'total_community_impact': self.total_community_impact,
+            'total_trees_planted': self.total_trees_planted,
+            'monthly_issues_increase': self.monthly_issues_increase,
+            'monthly_actions_increase': self.monthly_actions_increase,
+            'flood_reports_this_month': self.flood_reports_this_month,
+            'heat_alerts_active': self.heat_alerts_active,
+            'upcoming_events_count': self.upcoming_events_count,
+            'air_quality_improvement': self.air_quality_improvement,
+            'last_updated': self.last_updated.isoformat() if self.last_updated else None
+        }
+    
     def __repr__(self):
-        return f"<DashboardStats user_id={self.user_id}>"
+        return f"<DashboardStats id={self.id}>"
 
 
 class AIIntelligence(db.Model, SerializerMixin):
@@ -47,6 +64,20 @@ class AIIntelligence(db.Model, SerializerMixin):
     expires_at = db.Column(db.DateTime)
     
     serialize_rules = ()
+    
+    def to_dict(self):
+        """Convert AI intelligence to dictionary for API responses"""
+        return {
+            'id': self.id,
+            'user_county': self.user_county,
+            'insight_type': self.insight_type,
+            'title': self.title,
+            'description': self.description,
+            'severity': self.severity,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'expires_at': self.expires_at.isoformat() if self.expires_at else None
+        }
     
     def __repr__(self):
         return f"<AIIntelligence {self.insight_type} for {self.user_county}>"

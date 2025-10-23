@@ -4,29 +4,29 @@ from app.models.dashboard import DashboardStats, AIIntelligence, RecentActivity
 from app.models.profile import Profile
 #from app.models.reports import Report  # You'll need to create this
 #from app.models.community import CommunityAction  # You'll need to create this
-from app.models.emergency import EmergencyAlert  # You'll need to create this
+from app.models.emergency import Emergency
 from datetime import datetime, timedelta
 import random
 
 dashboard_bp = Blueprint('dashboard_bp', __name__)
 
-@dashboard_bp.route("/<int:user_id>", methods=["GET"])
-def get_dashboard_data(user_id):
+@dashboard_bp.route("/<int:profile_id>", methods=["GET"])
+def get_dashboard_data(profile_id):
     """Get complete dashboard data for a user"""
     
     # Get user profile for location and basic stats
-    profile = Profile.query.filter_by(user_id=user_id).first()
+    profile = Profile.query.get(profile_id)
     if not profile:
         return jsonify({"error": "Profile not found"}), 404
     
     # Calculate or get cached stats
-    dashboard_stats = calculate_dashboard_stats(user_id, profile)
+    dashboard_stats = calculate_dashboard_stats(profile_id, profile)
     
     # Get AI insights based on user's location
     ai_insights = get_ai_insights(profile.county)
     
     # Get recent activities
-    recent_activities = get_recent_activities(user_id)
+    recent_activities = get_recent_activities(profile_id)
     
     # Compile dashboard data
     dashboard_data = {
@@ -40,23 +40,31 @@ def get_dashboard_data(user_id):
     
     return jsonify(dashboard_data), 200
 
-def calculate_dashboard_stats(user_id, profile):
+def calculate_dashboard_stats(profile_id, profile):
     """Calculate or retrieve dashboard statistics"""
     
-    # Try to get cached stats first
-    stats = DashboardStats.query.filter_by(user_id=user_id).first()
-    
-    if not stats or (datetime.utcnow() - stats.last_updated) > timedelta(hours=1):
-        # Recalculate stats if cache is stale or doesn't exist
-        stats = recalculate_dashboard_stats(user_id, profile)
+    # For now, create stats directly from profile data since user_id is commented out
+    # In a real app, you'd want to cache this data
+    stats = create_dashboard_stats_from_profile(profile)
     
     return {
-        "issuesReported": stats.total_issues_reported,
-        "actionsJoined": stats.total_actions_joined,
-        "communityImpact": stats.total_community_impact,
-        "treesPlanted": stats.total_trees_planted,
-        "monthlyIssuesIncrease": stats.monthly_issues_increase,
-        "monthlyActionsIncrease": stats.monthly_actions_increase
+        "issuesReported": stats['total_issues_reported'],
+        "actionsJoined": stats['total_actions_joined'],
+        "communityImpact": stats['total_community_impact'],
+        "treesPlanted": stats['total_trees_planted'],
+        "monthlyIssuesIncrease": stats['monthly_issues_increase'],
+        "monthlyActionsIncrease": stats['monthly_actions_increase']
+    }
+
+def create_dashboard_stats_from_profile(profile):
+    """Create dashboard stats from profile data"""
+    return {
+        'total_issues_reported': profile.issues_reported or 0,
+        'total_actions_joined': 8,  # Mock data - replace with actual calculation
+        'total_community_impact': profile.community_impact or 452,
+        'total_trees_planted': profile.trees_planted or 0,
+        'monthly_issues_increase': profile.issues_this_month or 0,
+        'monthly_actions_increase': 2  # Mock data - replace with actual calculation
     }
 
 def recalculate_dashboard_stats(user_id, profile):
@@ -208,23 +216,23 @@ def generate_default_insights(county):
     db.session.commit()
     return default_insights
 
-def generate_sample_activities(user_id):
+def generate_sample_activities(profile_id):
     """Generate sample recent activities"""
     sample_activities = [
         RecentActivity(
-            user_id=user_id,
+            # user_id=profile_id,  # Commented out since user_id field is commented in model
             activity_type="report",
             title="Sarah M. reported a flooding issue",
             description="Downtown area near 5th Street - Storm drain overflow"
         ),
         RecentActivity(
-            user_id=user_id,
+            # user_id=profile_id,  # Commented out since user_id field is commented in model
             activity_type="community", 
             title="22 people joined Beach Cleanup",
             description="Marina Beach - Saturday 9 AM"
         ),
         RecentActivity(
-            user_id=user_id,
+            # user_id=profile_id,  # Commented out since user_id field is commented in model
             activity_type="alert",
             title="Heat Advisory issued", 
             description="Your area - Expected 95°F+ this weekend"
