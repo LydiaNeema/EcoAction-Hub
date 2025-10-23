@@ -48,7 +48,7 @@ export default function EmergencyPage() {
     severity: 'Medium'
   });
 
-  // Fetch insights
+  // Fetch insights from AI-powered API
   useEffect(() => {
     fetch(`${API_BASE_URL}/insights`)
       .then(res => res.json())
@@ -60,7 +60,7 @@ export default function EmergencyPage() {
       .catch(error => console.error('Error fetching insights:', error));
   }, []);
 
-  // Fetch priority alerts
+  // Fetch priority alerts from AI-powered API
   useEffect(() => {
     fetch(`${API_BASE_URL}/alerts/priority`)
       .then(res => res.json())
@@ -90,7 +90,7 @@ export default function EmergencyPage() {
       .catch(error => console.error('Error fetching contacts:', error));
   }, [selectedService]);
 
-  // Fetch all alerts for modal
+  // Fetch all alerts for modal from AI-powered API
   const fetchAllAlerts = () => {
     fetch(`${API_BASE_URL}/alerts`)
       .then(res => res.json())
