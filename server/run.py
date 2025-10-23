@@ -1,8 +1,15 @@
 import os
+from dotenv import load_dotenv
 from app import create_app
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Prevent Python from creating __pycache__ files
 os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+
+# Debug environment variables
+print(f"OpenAI API Key detected: {bool(os.getenv('OPENAI_API_KEY'))}")
 
 app = create_app()
 
