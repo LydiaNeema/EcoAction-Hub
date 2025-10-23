@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Droplets, Thermometer, Bell, Phone, Wind, Flame, X, Send } from 'lucide-react';
+import { Icon } from '@iconify/react';
 import Navbar from '@/components/Navbar';
 
 const API_BASE_URL = 'http://localhost:5000/api/emergency';
