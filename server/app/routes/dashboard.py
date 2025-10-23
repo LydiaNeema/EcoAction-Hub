@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.dashboard import DashboardStats, AIIntelligence, RecentActivity
 from app.models.profile import Profile
+from app.models.auth import User
 #from app.models.reports import Report  # You'll need to create this
 #from app.models.community import CommunityAction  # You'll need to create this
 from app.models.emergency import Emergency
@@ -10,23 +12,30 @@ import random
 
 dashboard_bp = Blueprint('dashboard_bp', __name__)
 
-@dashboard_bp.route("/<int:profile_id>", methods=["GET"])
-def get_dashboard_data(profile_id):
-    """Get complete dashboard data for a user"""
+@dashboard_bp.route("/", methods=["GET"])
+@jwt_required()
+def get_dashboard_data():
+    """Get complete dashboard data for authenticated user"""
+    
+    # Get current user from JWT token
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
     
     # Get user profile for location and basic stats
-    profile = Profile.query.get(profile_id)
+    profile = Profile.query.filter_by(user_id=user_id).first()
     if not profile:
         return jsonify({"error": "Profile not found"}), 404
     
     # Calculate or get cached stats
-    dashboard_stats = calculate_dashboard_stats(profile_id, profile)
+    dashboard_stats = calculate_dashboard_stats(user_id, profile)
     
     # Get AI insights based on user's location
     ai_insights = get_ai_insights(profile.county)
     
     # Get recent activities
-    recent_activities = get_recent_activities(profile_id)
+    recent_activities = get_recent_activities(user_id)
     
     # Compile dashboard data
     dashboard_data = {
@@ -40,7 +49,7 @@ def get_dashboard_data(profile_id):
     
     return jsonify(dashboard_data), 200
 
-def calculate_dashboard_stats(profile_id, profile):
+def calculate_dashboard_stats(user_id, profile):
     """Calculate or retrieve dashboard statistics"""
     
     # For now, create stats directly from profile data since user_id is commented out
@@ -216,23 +225,23 @@ def generate_default_insights(county):
     db.session.commit()
     return default_insights
 
-def generate_sample_activities(profile_id):
+def generate_sample_activities(user_id):
     """Generate sample recent activities"""
     sample_activities = [
         RecentActivity(
-            # user_id=profile_id,  # Commented out since user_id field is commented in model
+            user_id=user_id,
             activity_type="report",
             title="Sarah M. reported a flooding issue",
             description="Downtown area near 5th Street - Storm drain overflow"
         ),
         RecentActivity(
-            # user_id=profile_id,  # Commented out since user_id field is commented in model
+            user_id=user_id,
             activity_type="community", 
             title="22 people joined Beach Cleanup",
             description="Marina Beach - Saturday 9 AM"
         ),
         RecentActivity(
-            # user_id=profile_id,  # Commented out since user_id field is commented in model
+            user_id=user_id,
             activity_type="alert",
             title="Heat Advisory issued", 
             description="Your area - Expected 95°F+ this weekend"

@@ -33,6 +33,7 @@ def create_app():
     from app.models.dashboard import DashboardStats, AIIntelligence, RecentActivity
     from app.models.auth import User
     from app.models.achievements import Achievement, UserAchievement
+    from app.models.emergency import EmergencyAlert, EmergencyReport, EmergencyContact
     
 
     # ------------------- Register blueprints -------------------
