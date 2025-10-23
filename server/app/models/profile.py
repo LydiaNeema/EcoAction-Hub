@@ -6,7 +6,7 @@ class Profile(db.Model, SerializerMixin):
     __tablename__ = "profiles"
 
     id = db.Column(db.Integer, primary_key=True)
-    #user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)  # UNCOMMENT THIS
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
     full_name = db.Column(db.String(120))
     bio = db.Column(db.Text, default="")
     county = db.Column(db.String(100))
@@ -24,19 +24,20 @@ class Profile(db.Model, SerializerMixin):
     # Monthly statistics - for "+X this month"
     issues_this_month = db.Column(db.Integer, default=0)
     alerts_this_month = db.Column(db.Integer, default=0)
+    impact_this_month = db.Column(db.Integer, default=0)
     trees_this_month = db.Column(db.Integer, default=0)
 
-    # user = db.relationship("User", back_populates="profile")  # Commented out - User model not yet implemented
+    user = db.relationship("User", back_populates="profile")
     achievements = db.relationship("Achievement", secondary="user_achievements", back_populates="users")
 
     # Adding serializer rules
-    serialize_rules = ('-achievements',)  # Simplified for now
+    serialize_rules = ('-user', '-achievements')
 
     def to_dict(self):
         """Convert profile to dictionary for API responses"""
         return {
             "id": self.id,
-            # "user_id": self.user_id,  # Commented out since user_id field is commented
+            "user_id": self.user_id,
             "full_name": self.full_name,
             "bio": self.bio,
             "county": self.county,
@@ -50,6 +51,7 @@ class Profile(db.Model, SerializerMixin):
             "impact_points": self.impact_points,
             "issues_this_month": self.issues_this_month,
             "alerts_this_month": self.alerts_this_month,
+            "impact_this_month": self.impact_this_month,
             "trees_this_month": self.trees_this_month
         }
 
