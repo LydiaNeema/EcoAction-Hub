@@ -106,8 +106,8 @@ export default function Home() {
         <div className="grid md:grid-cols-3 gap-6">
           {/* Card 1: Emergency Response */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-left">
-            <div className="w-12 h-12 mb-4 flex items-center justify-center rounded-full bg-red-50">
-              <AlertTriangle className="text-red-600" size={28} />
+            <div className="w-12 h-12 mb-4 flex items-center justify-center rounded-full bg-white shadow-md">
+              <AlertTriangle className="text-gray-900" size={28} />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Emergency Response</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
@@ -117,8 +117,8 @@ export default function Home() {
 
           {/* Card 2: Real Time Alerts */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-left">
-            <div className="w-12 h-12 mb-4 flex items-center justify-center rounded-full bg-[#E8F5ED]">
-              <Bell className="text-[#16A34A]" size={28} />
+            <div className="w-12 h-12 mb-4 flex items-center justify-center rounded-full bg-white shadow-md">
+              <Bell className="text-gray-900" size={28} />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Real Time Alerts</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
@@ -128,8 +128,8 @@ export default function Home() {
 
           {/* Card 3: Take Action */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-left">
-            <div className="w-12 h-12 mb-4 flex items-center justify-center rounded-full bg-[#E8F5ED]">
-              <Zap className="text-[#16A34A]" size={28} />
+            <div className="w-12 h-12 mb-4 flex items-center justify-center rounded-full bg-white shadow-md">
+              <Zap className="text-gray-900" size={28} />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Take Action</h3>
             <p className="text-gray-600 text-sm leading-relaxed">
