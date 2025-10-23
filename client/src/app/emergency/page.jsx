@@ -12,6 +12,7 @@ const getAlertIcon = (type) => {
   if (type.toLowerCase().includes('flood')) return Droplets;
   if (type.toLowerCase().includes('heat')) return Thermometer;
   if (type.toLowerCase().includes('fire')) return Flame;
+  
   if (type.toLowerCase().includes('air')) return Wind;
   return AlertTriangle;
 };
@@ -199,8 +200,8 @@ export default function EmergencyPage() {
 
           <div className="flex gap-4 mb-6">
             <div className="flex-shrink-0">
-              <div className="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-white" strokeWidth={2.5} />
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
+                <AlertTriangle className="w-8 h-8 text-gray-900" strokeWidth={2.5} />
               </div>
             </div>
             <div>
@@ -251,8 +252,8 @@ export default function EmergencyPage() {
               priorityAlerts.map((alert) => (
               <div key={alert.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className={`${alert.color} bg-white p-2 rounded-lg`}>
-                    <alert.icon className="w-6 h-6" />
+                  <div className="bg-white p-2 rounded-full shadow-sm">
+                    <alert.icon className="w-6 h-6 text-gray-900" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800 text-sm">{alert.type}</h3>
@@ -283,8 +284,8 @@ export default function EmergencyPage() {
       <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
-              <Bell className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md">
+              <Bell className="w-6 h-6 text-gray-900" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">Emergency Reporting</h2>
