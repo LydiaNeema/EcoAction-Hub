@@ -7,7 +7,7 @@ class DashboardStats(db.Model, SerializerMixin):
     __tablename__ = "dashboard_stats"
     
     id = db.Column(db.Integer, primary_key=True)
-   #user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     
     # Quick Stats (cached for performance)
     total_issues_reported = db.Column(db.Integer, default=0)
@@ -87,7 +87,7 @@ class RecentActivity(db.Model, SerializerMixin):
     __tablename__ = "recent_activities"
     
     id = db.Column(db.Integer, primary_key=True)
-    #user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     activity_type = db.Column(db.String(50), nullable=False)  # report, community, alert
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
