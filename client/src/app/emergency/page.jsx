@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Droplets, Thermometer, Bell, Phone, Wind, Flame, X, Send } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { endpoints } from '@/services/apiConfig';
 
-const API_BASE_URL = 'http://localhost:5000/api/emergency';
+const API_BASE_URL = endpoints.emergency;
 
 // Helper function to get icon based on alert type
 const getAlertIcon = (type) => {
