@@ -14,6 +14,8 @@ class User(db.Model, SerializerMixin):
 
     # Relationships
     profile = db.relationship("Profile", uselist=False, back_populates="user")
+    dashboard_stats = db.relationship("DashboardStats", backref="user", lazy=True)
+    recent_activities = db.relationship("RecentActivity", backref="user", lazy=True)
 
     serialize_rules = ('-password_hash',)
 
