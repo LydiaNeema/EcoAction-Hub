@@ -33,8 +33,9 @@ export function useProfileData(userId) {
       try {
         setLoading(true);
         // Try to fetch from real API first
-        console.log('Attempting to fetch profile from API...');
+        console.log('Attempting to fetch profile from API for userId:', userId);
         const profileData = await profileService.fetchProfile(userId);
+        console.log('Profile data received:', profileData);
         setProfile(profileData);
         setError(null); // Clear any previous errors
       } catch (err) {
@@ -43,7 +44,7 @@ export function useProfileData(userId) {
         setTimeout(() => {
           setProfile(mockProfile);
           setError(null); // Don't show error for mock data
-        }, 800);
+        }, 500);
       } finally {
         setLoading(false);
       }
