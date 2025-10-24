@@ -11,7 +11,7 @@ export function AchievementCard({ name, icon, description, unlocked = true }) {
           <p className="text-sm text-gray-600 mt-1">{description}</p>
         </div>
         {unlocked && (
-          <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" title="Unlocked" />
+          <div className="w-2 h-2 bg-gray-900 rounded-full flex-shrink-0" title="Unlocked" />
         )}
       </div>
     </div>
