@@ -3,14 +3,17 @@ import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ReportsPage() {
+  const { user, refreshUser } = useAuth();
   const [formData, setFormData] = useState({
     issueType: '',
     location: '',
     description: '',
     images: []
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const issueTypes = [
     'Flooding',
@@ -73,16 +76,67 @@ export default function ReportsPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting report:', formData);
-    alert('Report submitted successfully! Our AI will analyze it immediately.');
-    setFormData({
-      issueType: '',
-      location: '',
-      description: '',
-      images: []
-    });
+    
+    if (!user) {
+      alert('Please log in to submit a report.');
+      return;
+    }
+
+    if (!formData.issueType || !formData.location || !formData.description) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const reportData = {
+        user_id: user.id,
+        title: `${formData.issueType} in ${formData.location}`,
+        description: formData.description,
+        issue_type: formData.issueType,
+        location: formData.location,
+        county: 'Nairobi', // Default county - you could make this dynamic
+        severity: 'medium',
+        priority: 'normal'
+      };
+
+      const response = await fetch('http://localhost:5000/api/reports/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit report');
+      }
+
+      const result = await response.json();
+      console.log('Report submitted successfully:', result);
+      
+      alert('Report submitted successfully! Our AI will analyze it immediately. Your statistics have been updated.');
+      
+      // Reset form
+      setFormData({
+        issueType: '',
+        location: '',
+        description: '',
+        images: []
+      });
+
+      // Refresh user data to show updated stats
+      await refreshUser();
+      
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -101,7 +155,7 @@ export default function ReportsPage() {
     <div className="flex min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 ml-64 p-8 overflow-y-auto h-screen">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -230,9 +284,10 @@ export default function ReportsPage() {
                   <div className="pt-4">
                     <button
                       type="submit"
-                      className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                      disabled={isSubmitting}
+                      className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Submit Report
+                      {isSubmitting ? 'Submitting...' : 'Submit Report'}
                     </button>
                   </div>
                 </form>
