@@ -1,8 +1,8 @@
-"""initial migrations
+"""initial migration
 
-Revision ID: 83604a1296e4
+Revision ID: 78b34152fdfd
 Revises: 
-Create Date: 2025-10-23 09:41:44.054710
+Create Date: 2025-10-23 15:30:24.536911
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '83604a1296e4'
+revision = '78b34152fdfd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,21 +37,6 @@ def upgrade():
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('expires_at', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('dashboard_stats',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('total_issues_reported', sa.Integer(), nullable=True),
-    sa.Column('total_actions_joined', sa.Integer(), nullable=True),
-    sa.Column('total_community_impact', sa.Integer(), nullable=True),
-    sa.Column('total_trees_planted', sa.Integer(), nullable=True),
-    sa.Column('monthly_issues_increase', sa.Integer(), nullable=True),
-    sa.Column('monthly_actions_increase', sa.Integer(), nullable=True),
-    sa.Column('flood_reports_this_month', sa.Integer(), nullable=True),
-    sa.Column('heat_alerts_active', sa.Boolean(), nullable=True),
-    sa.Column('upcoming_events_count', sa.Integer(), nullable=True),
-    sa.Column('air_quality_improvement', sa.Float(), nullable=True),
-    sa.Column('last_updated', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('emergency_alerts',
@@ -94,8 +79,37 @@ def upgrade():
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('users',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('password_hash', sa.String(length=255), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    with op.batch_alter_table('users', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_users_email'), ['email'], unique=True)
+
+    op.create_table('dashboard_stats',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('total_issues_reported', sa.Integer(), nullable=True),
+    sa.Column('total_actions_joined', sa.Integer(), nullable=True),
+    sa.Column('total_community_impact', sa.Integer(), nullable=True),
+    sa.Column('total_trees_planted', sa.Integer(), nullable=True),
+    sa.Column('monthly_issues_increase', sa.Integer(), nullable=True),
+    sa.Column('monthly_actions_increase', sa.Integer(), nullable=True),
+    sa.Column('flood_reports_this_month', sa.Integer(), nullable=True),
+    sa.Column('heat_alerts_active', sa.Boolean(), nullable=True),
+    sa.Column('upcoming_events_count', sa.Integer(), nullable=True),
+    sa.Column('air_quality_improvement', sa.Float(), nullable=True),
+    sa.Column('last_updated', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_dashboard_stats_user_id_users')),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('profiles',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('full_name', sa.String(length=120), nullable=True),
     sa.Column('bio', sa.Text(), nullable=True),
     sa.Column('county', sa.String(length=100), nullable=True),
@@ -109,15 +123,20 @@ def upgrade():
     sa.Column('impact_points', sa.Integer(), nullable=True),
     sa.Column('issues_this_month', sa.Integer(), nullable=True),
     sa.Column('alerts_this_month', sa.Integer(), nullable=True),
+    sa.Column('impact_this_month', sa.Integer(), nullable=True),
     sa.Column('trees_this_month', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_profiles_user_id_users')),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('recent_activities',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('activity_type', sa.String(length=50), nullable=False),
     sa.Column('title', sa.String(length=200), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_recent_activities_user_id_users')),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_achievements',
@@ -138,10 +157,14 @@ def downgrade():
     op.drop_table('user_achievements')
     op.drop_table('recent_activities')
     op.drop_table('profiles')
+    op.drop_table('dashboard_stats')
+    with op.batch_alter_table('users', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_users_email'))
+
+    op.drop_table('users')
     op.drop_table('emergency_reports')
     op.drop_table('emergency_contacts')
     op.drop_table('emergency_alerts')
-    op.drop_table('dashboard_stats')
     op.drop_table('ai_intelligence')
     op.drop_table('achievements')
     # ### end Alembic commands ###
