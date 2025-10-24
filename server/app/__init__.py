@@ -34,6 +34,7 @@ def create_app():
     from app.models.auth import User
     from app.models.achievements import Achievement, UserAchievement
     from app.models.emergency import EmergencyAlert, EmergencyReport, EmergencyContact
+    from app.models.community import CommunityAction, ActionParticipant
     
 
     # ------------------- Register blueprints -------------------
@@ -61,6 +62,13 @@ def create_app():
     except ImportError:
         pass  # Emergency routes not available yet
     
+    # Register community routes
+    try:
+        from app.routes import community
+        app.register_blueprint(community.bp)
+    except ImportError:
+        pass  # Community routes not available yet
+    
     # ------------------- Default route -------------------
     @app.route("/")
     def home():
@@ -76,7 +84,9 @@ def create_app():
                 'priority_alerts': '/api/emergency/alerts/priority',
                 'insights': '/api/emergency/insights',
                 'contacts': '/api/emergency/contacts',
-                'reports': '/api/emergency/reports'
+                'reports': '/api/emergency/reports',
+                'community_actions': '/api/community/actions',
+                'community_stats': '/api/community/stats'
             }
         }), 200
     return app
