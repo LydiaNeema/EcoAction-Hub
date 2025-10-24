@@ -56,7 +56,7 @@ export default function Dashboard() {
                   <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Join Actions</h3>
-                <p className="text-gray-600 text-sm">Participate in community initiatives</p>
+                <p className="text-gray-600 text-sm">Support community projects in your area</p>
               </div>
             </Link>
 
@@ -70,7 +70,7 @@ export default function Dashboard() {
                   <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">View Alerts</h3>
-                <p className="text-gray-600 text-sm">Check emergency notifications</p>
+                <p className="text-gray-600 text-sm">Stay alert to community emergency updates</p>
               </div>
             </Link>
           </div>
