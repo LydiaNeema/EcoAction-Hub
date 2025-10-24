@@ -126,23 +126,13 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {aiInsights.map((insight) => {
                 const IconComponent = iconComponents[insight.icon];
-                const colorClasses = {
-                  red: "bg-red-50 border-red-200",
-                  orange: "bg-orange-50 border-orange-200", 
-                  blue: "bg-blue-50 border-blue-200",
-                  green: "bg-green-50 border-green-200"
-                };
-                const iconColors = {
-                  red: "text-red-600",
-                  orange: "text-orange-600",
-                  blue: "text-blue-600", 
-                  green: "text-green-600"
-                };
 
                 return (
-                  <div key={insight.id} className={`rounded-xl border-2 p-6 ${colorClasses[insight.color]}`}>
+                  <div key={insight.id} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="flex items-start gap-3 mb-4">
-                      <IconComponent className={`w-5 h-5 mt-0.5 flex-shrink-0 ${iconColors[insight.color]}`} />
+                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                        <IconComponent className="w-5 h-5 text-gray-900" />
+                      </div>
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">{insight.title}</h3>
                         <p className="text-gray-600 text-sm">{insight.description}</p>
