@@ -63,16 +63,18 @@ export default function SignUpPage() {
   return (
     <main className="min-h-screen bg-[#F1FFF6] flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
-        <div className="mb-6 flex items-center gap-2">
-          <Image src="/EcoActionlogo.png" width={28} height={28} alt="logo" />
-          <div>
-            <p className="text-sm text-gray-700 leading-tight">EcoAction Hub</p>
-            <h1 className="text-xl font-semibold -mt-1">Join Eco Action Hub</h1>
-          </div>
-        </div>
+  <div className="flex flex-col items-center text-center mb-8">
+  <div className="flex items-center gap-2 mb-1">
+    <Image src="/EcoActionlogo.png" width={40} height={40} alt="EcoAction Logo" />
+    <h1 className="text-2xl font-semibold text-gray-900">Join Eco Action Hub</h1>
+  </div>
+  <p className="text-gray-600 text-sm -mt-1">Start making a difference in your community</p>
+</div>
+
+
 
         <form onSubmit={onSubmit} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <p className="text-gray-600 mb-4">Start making a difference in your community</p>
+         
 
           <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
           <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" placeholder="Your name" className="w-full mb-4 rounded-xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-green-500" />

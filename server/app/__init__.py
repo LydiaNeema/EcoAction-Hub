@@ -39,6 +39,8 @@ def create_app():
     # ------------------- Register blueprints -------------------
     from app.routes.profile import profile_bp
     from app.routes.dashboard import dashboard_bp
+    from app.routes.reports import reports_bp
+    app.register_blueprint(reports_bp, url_prefix='/api/reports')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(profile_bp, url_prefix='/api/profile')
     # Auth blueprint
