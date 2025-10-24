@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useProfileData } from '@/hooks/useProfileData';
+import { useAuth } from '@/context/AuthContext';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { StatsGrid } from '@/components/profile/StatsGrid';
 import { AchievementsGrid } from '@/components/profile/AchievementsGrid';
@@ -11,7 +12,8 @@ import { ImpactSummary } from '@/components/profile/ImpactSummary';
 import { Separator } from '@/components/ui/separator';
 
 export default function ProfilePage() {
-  const userId = 1;
+  const { user: authUser, loading: authLoading } = useAuth();
+  const userId = authUser?.id || 1; // Use logged-in user's ID or fallback to 1
   const { profile, loading, error, updateProfile } = useProfileData(userId);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +39,7 @@ export default function ProfilePage() {
     setIsEditing(false);
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="p-8">
@@ -75,12 +77,12 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-50">
         <div className="p-8">
           <div className="max-w-5xl mx-auto text-center">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+          <div className="bg-gray-100 border border-gray-400 text-gray-900 px-4 py-3 rounded-lg">
             Error loading profile: {error}
           </div>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
           >
             Retry
             </button>
