@@ -56,7 +56,7 @@ export default function Page() {
       <Navbar />
       
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 ml-64 overflow-y-auto h-screen">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex justify-between items-center">
