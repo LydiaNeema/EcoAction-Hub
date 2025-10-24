@@ -47,7 +47,7 @@ export default function Home() {
             Join thousands taking climate action — report issues, collaborate on solutions, and respond to emergencies together.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/community" className="border-2 border-gray-800 text-gray-800 px-8 py-3 rounded-md hover:bg-gray-800 hover:text-white transition-all font-medium">
+            <Link href="#testimonials" className="border-2 border-gray-800 text-gray-800 px-8 py-3 rounded-md hover:bg-gray-800 hover:text-white transition-all font-medium">
               Learn More
             </Link>
             <Link href="/auth/signup" className="bg-[#16A34A] text-white px-8 py-3 rounded-md hover:bg-[#15803D] transition-all font-medium">
@@ -164,7 +164,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
+      <section className="max-w-6xl mx-auto px-6 py-16" id ="testimonials">
         <h2 className="text-4xl font-bold text-gray-900 text-center mb-12">
           Community Impact Stories
         </h2>
