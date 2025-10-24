@@ -19,11 +19,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen  bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50">
       <Navbar />
       
-      {/* Main Content - Fixed Layout */}
-      <main className="flex-1 p-8   overflow-y-auto">
+      {/* Main Content - Scrollable */}
+      <main className="flex-1 ml-64 p-8 overflow-y-auto h-screen">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Welcome Section */}
           <div>
