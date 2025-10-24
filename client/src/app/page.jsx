@@ -29,7 +29,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="relative bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url('/BG.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+      <div className="relative bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url('/assets/BG.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
       {/* Hero Section */}
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
@@ -62,7 +62,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-lg overflow-hidden shadow-lg h-64 bg-white relative">
             <Image 
-              src="/CommunityCleanup.jpg"
+              src="/assets/CommunityCleanup.jpg"
               alt="Community Cleanup"
               fill
               className="object-cover"
@@ -71,7 +71,7 @@ export default function Home() {
           </div>
           <div className="rounded-lg overflow-hidden shadow-lg h-64 bg-white relative">
             <Image 
-              src="/FloodResponse.jpg"
+              src="/assets/FloodResponse.jpg"
               alt="Flood Response"
               fill
               className="object-cover"
@@ -80,7 +80,7 @@ export default function Home() {
           </div>
           <div className="rounded-lg overflow-hidden shadow-lg h-64 bg-white relative">
             <Image 
-              src="/EnvironmentalAction.jpg"
+              src="/assets/EnvironmentalAction.jpg"
               alt="Environmental Action"
               fill
               className="object-cover"

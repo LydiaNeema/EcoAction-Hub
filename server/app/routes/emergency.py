@@ -26,7 +26,6 @@ if OPENAI_API_KEY:
     except Exception as e:
         print(f"Warning: Could not initialize OpenAI client: {e}")
 
-
 def generate_ai_alerts(location="Nairobi County"):
     """Generate emergency alerts using OpenAI."""
     if not openai_client:
@@ -65,7 +64,6 @@ def generate_ai_alerts(location="Nairobi County"):
         print(f"OpenAI alert generation error: {e}")
         return None
 
-
 def generate_ai_insights(location="Nairobi County"):
     """Generate emergency insights using OpenAI."""
     if not openai_client:
@@ -77,11 +75,11 @@ def generate_ai_insights(location="Nairobi County"):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an AI assistant providing climate emergency insights for Kenya."
+                    "content": "You are an emergency insights system for climate-related emergencies in Kenya. Generate realistic emergency insights in JSON format."
                 },
                 {
                     "role": "user",
-                    "content": f"Generate emergency insights for {location}. Return JSON with: title (brief alert title), description (2 sentences about current situation), recommendation (safety advice), alertTrend (e.g., 'Increasing'), affectedAreas (number like '8 Locations'), activeAlerts (number 3-10). Make it realistic for Nairobi's climate."
+                    "content": f"Generate emergency insights for {location}. Include overall situation, active alerts count, affected areas, alert trend, and recommendations. Return as JSON with fields: title, description, recommendation, alertTrend, affectedAreas, county, activeAlerts."
                 }
             ],
             max_tokens=300,
@@ -89,16 +87,16 @@ def generate_ai_insights(location="Nairobi County"):
             response_format={"type": "json_object"}
         )
         
-        insights = json.loads(completion.choices[0].message.content)
-        insights['county'] = location
-        insights['aiStatus'] = 'AI Powered'
+        response_text = completion.choices[0].message.content
+        data = json.loads(response_text)
         
-        return insights
+        # Add default values
+        data['aiStatus'] = 'AI Powered'
+        return data
             
     except Exception as e:
         print(f"OpenAI insights generation error: {e}")
         return None
-
 
 # Get all active emergency alerts
 @bp.route('/alerts', methods=['GET'])

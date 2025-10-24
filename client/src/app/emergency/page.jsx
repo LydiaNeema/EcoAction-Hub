@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Droplets, Thermometer, Bell, Phone, Wind, Flame, X, Send } from 'lucide-react';
+import { Icon } from '@iconify/react';
 import Navbar from '@/components/Navbar';
 import { endpoints } from '@/services/apiConfig';
 

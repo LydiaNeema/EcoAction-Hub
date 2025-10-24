@@ -30,12 +30,16 @@ def create_app():
 
     # ------------------- Import models (for Alembic) -------------------
     from app.models.profile import Profile
+    from app.models.dashboard import DashboardStats, AIIntelligence, RecentActivity
     from app.models.auth import User
     from app.models.achievements import Achievement, UserAchievement
+    from app.models.emergency import EmergencyAlert, EmergencyReport, EmergencyContact
     
 
     # ------------------- Register blueprints -------------------
     from app.routes.profile import profile_bp
+    from app.routes.dashboard import dashboard_bp
+    app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(profile_bp, url_prefix='/api/profile')
     # Auth blueprint
     try:
