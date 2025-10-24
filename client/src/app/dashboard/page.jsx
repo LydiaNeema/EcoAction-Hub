@@ -12,6 +12,19 @@ export default function Dashboard() {
   
   // Use logged-in user's name or fallback to static data
   const userName = authUser?.full_name?.split(' ')[0] || dashboardData.user.name;
+  
+  // Get real user stats from profile, defaulting to 0 for new users
+  const userProfile = authUser?.profile || {};
+  const userStats = {
+    issuesReported: userProfile.issues_reported || 0,
+    actionsJoined: userProfile.alerts_responded || 0,
+    communityImpact: userProfile.community_impact || 0,
+    treesPlanted: userProfile.trees_planted || 0,
+    issuesThisMonth: userProfile.issues_this_month || 0,
+    alertsThisMonth: userProfile.alerts_this_month || 0,
+    impactThisMonth: userProfile.impact_this_month || 0,
+    treesThisMonth: userProfile.trees_this_month || 0
+  };
 
   // Icon mapping
   const iconComponents = {
@@ -87,35 +100,35 @@ export default function Dashboard() {
               {/* Issues Reported */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <p className="text-gray-600 text-sm mb-2">Issues reported</p>
-                <p className="text-3xl font-bold text-gray-900 mb-2">12</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">{userStats.issuesReported}</p>
                 <div className="flex items-center text-sm text-gray-500">
                   <TrendingUp className="w-4 h-4 mr-1 text-gray-900" />
-                  <span>0.5% worth</span>
+                  <span>+{userStats.issuesThisMonth} this month</span>
                 </div>
               </div>
 
               {/* Actions Joined */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <p className="text-gray-600 text-sm mb-2">Actions joined</p>
-                <p className="text-3xl font-bold text-gray-900 mb-2">8</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">{userStats.actionsJoined}</p>
                 <div className="flex items-center text-sm text-gray-500">
                   <TrendingUp className="w-4 h-4 mr-1 text-gray-900" />
-                  <span>4.5% worth</span>
+                  <span>+{userStats.alertsThisMonth} this month</span>
                 </div>
               </div>
 
               {/* Community Impact */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <p className="text-gray-600 text-sm mb-2">Community impacted</p>
-                <p className="text-3xl font-bold text-gray-900 mb-2">452</p>
-                <p className="text-sm text-gray-500">0.5% worth</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">{userStats.communityImpact}</p>
+                <p className="text-sm text-gray-500">+{userStats.impactThisMonth} this month</p>
               </div>
 
               {/* Trees Planted */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <p className="text-gray-600 text-sm mb-2">Trees planted</p>
-                <p className="text-3xl font-bold text-gray-900 mb-2">24</p>
-                <p className="text-sm text-gray-500">2.5% worth</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">{userStats.treesPlanted}</p>
+                <p className="text-sm text-gray-500">+{userStats.treesThisMonth} this month</p>
               </div>
             </div>
           </div>
