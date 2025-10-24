@@ -4,9 +4,14 @@ import React from 'react';
 import { FileText, Users, AlertTriangle, TrendingUp, ArrowRight, Droplets, Flame, Wind } from "lucide-react";
 import { dashboardData } from "@/data/dashboardData";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
-  const { user, aiInsights, recentActivities } = dashboardData;
+  const { user: authUser, loading: authLoading } = useAuth();
+  const { aiInsights, recentActivities } = dashboardData;
+  
+  // Use logged-in user's name or fallback to static data
+  const userName = authUser?.full_name?.split(' ')[0] || dashboardData.user.name;
 
   // Icon mapping
   const iconComponents = {
@@ -23,7 +28,7 @@ export default function Dashboard() {
           {/* Welcome Section */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back, {user.name}! 
+              Welcome back, {userName}! 👋
             </h1>
             <p className="text-gray-600">
               Here's what's happening in your community today
@@ -34,10 +39,10 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Report Issue Card */}
             <Link href="/reports" className="block">
-              <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-blue-500/40 transition-all cursor-pointer shadow-sm p-6 hover:shadow-md">
+              <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-gray-400 transition-all cursor-pointer shadow-sm p-6 hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-blue-600" />
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-gray-900" />
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
@@ -48,10 +53,10 @@ export default function Dashboard() {
 
             {/* Join Actions Card */}
             <Link href="/community" className="block">
-              <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-green-500/40 transition-all cursor-pointer shadow-sm p-6 hover:shadow-md">
+              <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-gray-400 transition-all cursor-pointer shadow-sm p-6 hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-green-600" />
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-gray-900" />
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
@@ -62,10 +67,10 @@ export default function Dashboard() {
 
             {/* View Alerts Card */}
             <Link href="/emergency" className="block">
-              <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-red-500/40 transition-all cursor-pointer shadow-sm p-6 hover:shadow-md">
+              <div className="bg-white rounded-xl border-2 border-gray-200 hover:border-gray-400 transition-all cursor-pointer shadow-sm p-6 hover:shadow-md">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-gray-900" />
                   </div>
                   <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
@@ -82,9 +87,9 @@ export default function Dashboard() {
               {/* Issues Reported */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <p className="text-gray-600 text-sm mb-2">Issues reported</p>
-                <p className="text-3xl font-bold text-blue-600 mb-2">12</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">12</p>
                 <div className="flex items-center text-sm text-gray-500">
-                  <TrendingUp className="w-4 h-4 mr-1 text-blue-600" />
+                  <TrendingUp className="w-4 h-4 mr-1 text-gray-900" />
                   <span>0.5% worth</span>
                 </div>
               </div>
@@ -92,9 +97,9 @@ export default function Dashboard() {
               {/* Actions Joined */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <p className="text-gray-600 text-sm mb-2">Actions joined</p>
-                <p className="text-3xl font-bold text-green-600 mb-2">8</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">8</p>
                 <div className="flex items-center text-sm text-gray-500">
-                  <TrendingUp className="w-4 h-4 mr-1 text-green-600" />
+                  <TrendingUp className="w-4 h-4 mr-1 text-gray-900" />
                   <span>4.5% worth</span>
                 </div>
               </div>
@@ -109,7 +114,7 @@ export default function Dashboard() {
               {/* Trees Planted */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <p className="text-gray-600 text-sm mb-2">Trees planted</p>
-                <p className="text-3xl font-bold text-blue-600 mb-2">24</p>
+                <p className="text-3xl font-bold text-gray-900 mb-2">24</p>
                 <p className="text-sm text-gray-500">2.5% worth</p>
               </div>
             </div>
@@ -119,7 +124,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">AI INSIGHTS FOR YOUR AREA</h2>
-              <span className="bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">
+              <span className="bg-gray-100 text-gray-900 text-xs font-medium px-3 py-1 rounded-full">
                 Powered by AI
               </span>
             </div>
@@ -140,7 +145,7 @@ export default function Dashboard() {
                     </div>
                     {insight.type === 'event' ? (
                       <Link href="/community">
-                        <button className="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        <button className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
                           {insight.buttonText}
                         </button>
                       </Link>
@@ -165,9 +170,9 @@ export default function Dashboard() {
                 {recentActivities.map((activity) => {
                   const IconComponent = iconComponents[activity.icon];
                   const iconColors = {
-                    report: "bg-blue-100 text-blue-600",
-                    community: "bg-green-100 text-green-600", 
-                    alert: "bg-red-100 text-red-600"
+                    report: "bg-gray-100 text-gray-900",
+                    community: "bg-gray-100 text-gray-900", 
+                    alert: "bg-gray-100 text-gray-900"
                   };
 
                   return (

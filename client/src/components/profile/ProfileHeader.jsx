@@ -13,7 +13,7 @@ export function ProfileHeader({ profile, isEditing, isSubmitting, onEditToggle, 
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-6">
             <Avatar className="w-24 h-24">
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+              <AvatarFallback className="bg-gray-900 text-white text-2xl">
                 {getInitials(profile?.full_name)}
               </AvatarFallback>
             </Avatar>

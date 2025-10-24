@@ -21,7 +21,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isSubmitting }) {
           id="name"
           name="name"
           type="text"
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 ${
             formik.touched.name && formik.errors.name 
               ? 'border-destructive' 
               : 'border-input'
@@ -42,7 +42,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isSubmitting }) {
           id="email"
           name="email"
           type="email"
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 ${
             formik.touched.email && formik.errors.email 
               ? 'border-destructive' 
               : 'border-input'
@@ -64,7 +64,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isSubmitting }) {
           <select
             id="county"
             name="county"
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 ${
               formik.touched.county && formik.errors.county 
                 ? 'border-destructive' 
                 : 'border-input'
@@ -93,7 +93,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isSubmitting }) {
             name="area"
             type="text"
             placeholder="e.g., Westlands, Kilimani"
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 ${
               formik.touched.area && formik.errors.area 
                 ? 'border-destructive' 
                 : 'border-input'
@@ -113,7 +113,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isSubmitting }) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : 'Save Changes'}
         </button>
@@ -121,7 +121,7 @@ export function ProfileForm({ initialData, onSave, onCancel, isSubmitting }) {
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 border border-input bg-background rounded-lg hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+          className="px-4 py-2 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 disabled:opacity-50"
         >
           Cancel
         </button>
