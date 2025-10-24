@@ -6,7 +6,7 @@ from app.models.profile import Profile
 from app.models.auth import User
 #from app.models.reports import Report  # You'll need to create this
 #from app.models.community import CommunityAction  # You'll need to create this
-from app.models.emergency import Emergency
+from app.models.emergency import EmergencyAlert
 from datetime import datetime, timedelta
 import random
 
