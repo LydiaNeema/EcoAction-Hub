@@ -4,10 +4,25 @@ import { Home, AlertTriangle, Users, Bell, Bot, User, Phone, TreePine } from 'lu
 import { clearToken } from '@/utils/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  
+  // Get user initials from full name
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+  
+  const userName = user?.full_name || 'Guest User';
+  const userInitials = getInitials(user?.full_name);
 
   const menuItems = [
     { href: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -65,14 +80,14 @@ const Navbar = () => {
       <div className="p-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">LC</span>
+            <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">{userInitials}</span>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">Lydia Chen</p>
+              <p className="text-sm font-medium text-gray-900">{userName}</p>
             </div>
           </div>
-          <button onClick={() => { clearToken(); router.replace('/'); }} className="w-full text-left text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
+          <button onClick={() => { logout(); clearToken(); router.replace('/'); }} className="w-full text-left text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
             Logout
           </button>
         </div>
