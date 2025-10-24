@@ -28,7 +28,7 @@ export default function Dashboard() {
           {/* Welcome Section */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back, {userName}! 👋
+              Welcome back, {userName}!
             </h1>
             <p className="text-gray-600">
               Here's what's happening in your community today
@@ -145,9 +145,10 @@ export default function Dashboard() {
                     </div>
                     {insight.type === 'event' ? (
                       <Link href="/community">
-                        <button className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+                        <button className="text-sm bg-[rgba(32,165,41,1)] text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors">
                           {insight.buttonText}
                         </button>
+                        
                       </Link>
                     ) : (
                       <Link href="/emergency">

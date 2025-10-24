@@ -31,6 +31,8 @@ export default function Home() {
 
       <div className="relative bg-cover bg-center" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.65), rgba(255,255,255,0.65)), url('/assets/BG.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
       {/* Hero Section */}
+
+      <div className="absolute inset-0 bg-black/25"></div>
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
           <svg viewBox="0 0 1200 400" className="w-full h-full">
@@ -40,14 +42,14 @@ export default function Home() {
           </svg>
         </div>
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold text-white-900 mb-6 leading-tight">
             Turn Climate Concern Into Community Action
           </h1>
-          <p className="text-lg text-gray-700 mb-10 max-w-3xl mx-auto">
+          <p className="text-lg text-white-700 mb-10 max-w-3xl mx-auto">
             Join thousands taking climate action — report issues, collaborate on solutions, and respond to emergencies together.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/community" className="border-2 border-gray-800 text-gray-800 px-8 py-3 rounded-md hover:bg-gray-800 hover:text-white transition-all font-medium">
+            <Link href="#testimonials" className="border-2 border-gray-800 text-gray-800 px-8 py-3 rounded-md hover:bg-gray-800 hover:text-white transition-all font-medium">
               Learn More
             </Link>
             <Link href="/auth/signup" className="bg-[#16A34A] text-white px-8 py-3 rounded-md hover:bg-[#15803D] transition-all font-medium">
@@ -164,7 +166,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
+      <section className="max-w-6xl mx-auto px-6 py-16" id ="testimonials">
         <h2 className="text-4xl font-bold text-gray-900 text-center mb-12">
           Community Impact Stories
         </h2>

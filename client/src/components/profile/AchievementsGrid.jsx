@@ -3,10 +3,10 @@ import { AchievementCard } from './AchievementCard';
 
 export function AchievementsGrid({ achievements = [] }) {
   const defaultAchievements = [
-    { name: "Early Adopter", icon: "🌱", description: "Joined in the first month" },
-    { name: "Tree Champion", icon: "🌳", description: "Planted 20+ trees" },
-    { name: "Community Leader", icon: "⭐", description: "Joined 5+ actions" },
-    { name: "Alert Hero", icon: "🚨", description: "Responded to 5 emergencies" },
+    { name: "Early Adopter", description: "Joined in the first month" },
+    { name: "Tree Champion", description: "Planted 20+ trees" },
+    { name: "Community Leader", description: "Joined 5+ actions" },
+    { name: "Alert Hero", description: "Responded to 5 emergencies" },
     ...achievements
   ];
 
@@ -18,7 +18,6 @@ export function AchievementsGrid({ achievements = [] }) {
           <AchievementCard
             key={index}
             name={achievement.name}
-            icon={achievement.icon}
             description={achievement.description}
             unlocked={achievement.unlocked !== false}
           />
