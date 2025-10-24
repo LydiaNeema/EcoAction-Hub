@@ -8,25 +8,25 @@ export function StatsGrid({ stats }) {
       icon: FileText, 
       label: "Issues Reported", 
       value: stats?.issues_reported || 12, 
-      color: "text-gray-600" 
+      color: "text-gray-900" 
     },
     { 
       icon: Users, 
       label: "Actions Joined", 
       value: stats?.actions_joined || 8, 
-      color: "text-blue-600" 
+      color: "text-gray-900" 
     },
     { 
       icon: AlertTriangle, 
       label: "Alerts Responded", 
       value: stats?.alerts_responded || 452, 
-      color: "text-yellow-600" 
+      color: "text-gray-900" 
     },
     { 
       icon: Award, 
       label: "Impact Points", 
       value: stats?.impact_points || 452, 
-      color: "text-orange-600" 
+      color: "text-gray-900" 
     },
   ];
 
