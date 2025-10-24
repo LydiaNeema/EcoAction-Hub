@@ -179,7 +179,7 @@ export default function EmergencyPage() {
   return (
     <div className="flex">
       <Navbar />
-      <div className="flex-1 min-h-screen bg-white p-6">
+      <div className="flex-1 ml-64 h-screen overflow-y-auto bg-white p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">Emergency Alerts</h1>

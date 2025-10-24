@@ -37,22 +37,22 @@ const Navbar = () => {
   const isActive = (path) => pathname === path;
 
   return (
-    <nav className="w-64 min-h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col border-r border-gray-200">
+    <nav className="w-64 h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col border-r border-gray-200 fixed left-0 top-0 overflow-hidden">
       {/* Logo */}
-      <div className="p-6 bg-white">
+      <div className="p-4 bg-white flex-shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
           <img 
             src="/EcoActionlogo.png" 
             alt="EcoAction Logo" 
-            className="w-8 h-8 object-contain"
+            className="w-7 h-7 object-contain"
           />
-          <span className="text-xl font-semibold text-gray-900">EcoAction</span>
+          <span className="text-lg font-semibold text-gray-900">EcoAction</span>
         </Link>
       </div>
 
       {/* Menu Items */}
-      <div className="flex-1 px-4 py-4">
-        <ul className="space-y-3">
+      <div className="flex-1 px-4 py-3 overflow-y-auto">
+        <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -61,7 +61,7 @@ const Navbar = () => {
               <li key={item.href}>
                 <Link 
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 ${
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 ${
                     active 
                       ? 'text-white bg-green-600 border border-green-600' 
                       : 'text-gray-700 bg-white border border-gray-100 hover:bg-gray-50'
@@ -76,21 +76,14 @@ const Navbar = () => {
         </ul>
       </div>
 
-      {/* User Profile & Logout */}
-      <div className="p-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">{userInitials}</span>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">{userName}</p>
-            </div>
-          </div>
-          <button onClick={() => { logout(); clearToken(); router.replace('/'); }} className="w-full text-left text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
-            Logout
-          </button>
-        </div>
+      {/* Logout Button */}
+      <div className="p-3 flex-shrink-0 flex justify-center">
+        <button 
+          onClick={() => { logout(); clearToken(); router.replace('/'); }} 
+          className="w-full max-w-[50%] bg-white text-gray-700 px-3 py-2 rounded-lg shadow-sm border border-gray-100 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200 font-medium text-xs"
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );
