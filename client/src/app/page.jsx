@@ -7,8 +7,8 @@ import { AlertTriangle, Bell, Zap } from 'lucide-react';
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#F6FFF8]">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200">
+      {/* Navigation - Sticky */}
+      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -236,11 +236,109 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 py-8">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-gray-500 text-sm">
-            © 2025 EcoAction Hub. Building sustainable communities together
-          </p>
+      <footer className="bg-gray-50 border-t border-gray-200 py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* About */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">About</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/mission" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Our Mission
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/team" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Team
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Features */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Features</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Dashboard
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/community" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Community Actions
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/emergency" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Emergency Alerts
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/ai" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    AI Assistant
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Resources</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/help" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/guides" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Guides
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Contact Us
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/privacy" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/cookies" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                    Cookie Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-gray-200 pt-8 text-center">
+            <p className="text-gray-500 text-sm">
+              © 2025 EcoAction Hub. Building sustainable communities together
+            </p>
+          </div>
         </div>
       </footer>
     </div>
