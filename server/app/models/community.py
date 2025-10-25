@@ -39,7 +39,7 @@ class ActionParticipant(db.Model, SerializerMixin):
 
     # Relationships
     action = db.relationship('CommunityAction', back_populates='participants')
-    user = db.relationship('User', backref='participated_actions')
+    user = db.relationship('User', back_populates='participated_actions')
 
     serialize_rules = ('-action.participants', '-user.participated_actions')
 

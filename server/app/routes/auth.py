@@ -28,11 +28,15 @@ def register():
         db.session.add(profile)
         db.session.commit()
 
-        token = create_access_token(identity=user.id)
+        token = create_access_token(identity=str(user.id))
         return jsonify({
             'success': True,
             'token': token,
-            'user': user_schema.dump(user),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'created_at': user.created_at.isoformat() if user.created_at else None
+            },
             'profile': profile.to_dict() if hasattr(profile, 'to_dict') else {
                 'id': profile.id,
                 'user_id': profile.user_id,
@@ -55,13 +59,17 @@ def login():
         if not user or not user.check_password(data['password']):
             return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
 
-        token = create_access_token(identity=user.id)
+        token = create_access_token(identity=str(user.id))
 
         profile = Profile.query.filter_by(user_id=user.id).first()
         return jsonify({
             'success': True,
             'token': token,
-            'user': user_schema.dump(user),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'created_at': user.created_at.isoformat() if user.created_at else None
+            },
             'profile': profile.to_dict() if profile and hasattr(profile, 'to_dict') else None
         }), 200
     except ValidationError as e:
@@ -74,12 +82,16 @@ def login():
 @jwt_required()
 def me():
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         user = User.query.get_or_404(user_id)
         profile = Profile.query.filter_by(user_id=user_id).first()
         return jsonify({
             'success': True,
-            'user': user_schema.dump(user),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'created_at': user.created_at.isoformat() if user.created_at else None
+            },
             'profile': profile.to_dict() if profile and hasattr(profile, 'to_dict') else None
         }), 200
     except Exception as e:

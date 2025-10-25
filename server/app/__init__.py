@@ -35,6 +35,7 @@ def create_app():
     from app.models.achievements import Achievement, UserAchievement
     from app.models.emergency import EmergencyAlert, EmergencyReport, EmergencyContact
     from app.models.community import CommunityAction, ActionParticipant
+    from app.models.reports import Report
     
 
     # ------------------- Register blueprints -------------------
