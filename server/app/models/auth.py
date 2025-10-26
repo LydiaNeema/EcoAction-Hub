@@ -16,8 +16,11 @@ class User(db.Model, SerializerMixin):
     profile = db.relationship("Profile", uselist=False, back_populates="user")
     dashboard_stats = db.relationship("DashboardStats", backref="user", lazy=True)
     recent_activities = db.relationship("RecentActivity", backref="user", lazy=True)
+    reports = db.relationship("Report", back_populates="user", lazy=True)
+    report_comments = db.relationship("ReportComment", back_populates="user", lazy=True)
+    participated_actions = db.relationship("ActionParticipant", back_populates="user", lazy=True)
 
-    serialize_rules = ('-password_hash',)
+    serialize_rules = ('-password_hash', '-profile', '-dashboard_stats', '-recent_activities', '-reports', '-report_comments', '-participated_actions')
 
     def set_password(self, password: str):
         self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')

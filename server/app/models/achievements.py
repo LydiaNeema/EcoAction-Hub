@@ -22,7 +22,7 @@ class UserAchievement(db.Model,SerializerMixin):
     unlocked_at = db.Column(db.DateTime,server_default = db.func.now())
     progress = db.Column(db.Integer,default =0)
 
-    achievement = db.relationship("Achievement")
+    achievement = db.relationship("Achievement", overlaps="achievements,users")
 
 
 

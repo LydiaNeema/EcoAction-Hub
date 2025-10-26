@@ -19,7 +19,13 @@ export function AuthProvider({ children }) {
         try {
           const response = await authService.me(token);
           if (response.success && response.user) {
-            setUser(response.user);
+            // Merge profile data into user object for easy access
+            const userWithProfile = {
+              ...response.user,
+              full_name: response.profile?.full_name || response.user.full_name,
+              profile: response.profile
+            };
+            setUser(userWithProfile);
           } else {
             clearToken();
           }
@@ -41,7 +47,13 @@ export function AuthProvider({ children }) {
       
       if (response.success && response.token && response.user) {
         setToken(response.token);
-        setUser(response.user);
+        // Merge profile data into user object for easy access
+        const userWithProfile = {
+          ...response.user,
+          full_name: response.profile?.full_name || response.user.full_name,
+          profile: response.profile
+        };
+        setUser(userWithProfile);
         return { success: true };
       } else {
         throw new Error(response.error || 'Login failed');
@@ -60,7 +72,13 @@ export function AuthProvider({ children }) {
       
       if (response.success && response.token && response.user) {
         setToken(response.token);
-        setUser(response.user);
+        // Merge profile data into user object for easy access
+        const userWithProfile = {
+          ...response.user,
+          full_name: response.profile?.full_name || response.user.full_name,
+          profile: response.profile
+        };
+        setUser(userWithProfile);
         return { success: true };
       } else {
         throw new Error(response.error || 'Registration failed');
@@ -78,6 +96,25 @@ export function AuthProvider({ children }) {
     setError(null);
   };
 
+  const refreshUser = async () => {
+    const token = getToken();
+    if (token) {
+      try {
+        const response = await authService.me(token);
+        if (response.success && response.user) {
+          const userWithProfile = {
+            ...response.user,
+            full_name: response.profile?.full_name || response.user.full_name,
+            profile: response.profile
+          };
+          setUser(userWithProfile);
+        }
+      } catch (err) {
+        console.error('Failed to refresh user:', err);
+      }
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -85,6 +122,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    refreshUser,
     isAuthenticated: !!user
   };
 

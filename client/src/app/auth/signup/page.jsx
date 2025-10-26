@@ -2,12 +2,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { authService } from "@/services/authService";
-import { setToken } from "@/utils/auth";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { register } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,18 +43,14 @@ export default function SignUpPage() {
     setLoading(true);
     setError("");
     try {
-      const { token } = await authService.register({ full_name: fullName, email, password });
-      setToken(token);
-      router.push("/dashboard");
-    } catch (err) {
-      // Provide more user-friendly error messages
-      if (err.message.includes("Email already registered")) {
-        setError("This email is already registered. Please try signing in instead.");
-      } else if (err.message.includes("Network error")) {
-        setError("Unable to connect to server. Please check your internet connection and try again.");
+      const result = await register(fullName, email, password);
+      if (result.success) {
+        router.push("/dashboard");
       } else {
-        setError(err.message || "Registration failed. Please try again.");
+        setError(result.error || "Registration failed. Please try again.");
       }
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }

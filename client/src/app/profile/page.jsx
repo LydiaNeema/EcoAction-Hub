@@ -103,7 +103,7 @@ export default function ProfilePage() {
           </div>
 
           <ProfileHeader
-            profile={profile}
+            profile={{...profile, email: authUser?.email}}
             isEditing={isEditing}
             isSubmitting={isSubmitting}
             onEditToggle={() => setIsEditing(!isEditing)}

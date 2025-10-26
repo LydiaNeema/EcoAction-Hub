@@ -2,13 +2,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { authService } from "@/services/authService";
-import { setToken } from "@/utils/auth";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignInPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,15 +24,14 @@ export default function SignInPage() {
     setLoading(true);
     setError("");
     try {
-      const { token } = await authService.login({ email, password });
-      setToken(token);
-      router.push("/dashboard");
-    } catch (err) {
-      if (err.message.includes("Invalid credentials")) {
-        setError("Invalid email or password.");
+      const result = await login(email, password);
+      if (result.success) {
+        router.push("/dashboard");
       } else {
-        setError(err.message || "Sign in failed. Please try again.");
+        setError(result.error || "Sign in failed. Please try again.");
       }
+    } catch (err) {
+      setError(err.message || "Sign in failed. Please try again.");
     } finally {
       setLoading(false);
     }
