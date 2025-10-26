@@ -7,7 +7,7 @@ class ChatRequestSchema(Schema):
 
 class ChatResponseSchema(Schema):
     reply = fields.Str(required=True)
-    source = fields.Str(required=False, default="Rule-based")
+    source = fields.Str(required=False)
 
 
 chat_request_schema = ChatRequestSchema()

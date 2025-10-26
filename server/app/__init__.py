@@ -49,35 +49,41 @@ def create_app():
     try:
         from app.routes.auth import bp as auth_bp
         app.register_blueprint(auth_bp)
-    except Exception:
-        pass
+        print("✓ Auth blueprint registered successfully")
+    except Exception as e:
+        print(f"✗ Auth blueprint registration failed: {e}")
+    
     # AI blueprint
     try:
         from app.routes.ai import bp as ai_bp
         app.register_blueprint(ai_bp)
-    except Exception:
-        pass
+        print("✓ AI blueprint registered successfully")
+    except Exception as e:
+        print(f"✗ AI blueprint registration failed: {e}")
     
-    # Register emergency routes if they exist
+    # Register emergency routes
     try:
         from app.routes import emergency
         app.register_blueprint(emergency.bp)
-    except ImportError:
-        pass  # Emergency routes not available yet
+        print("✓ Emergency blueprint registered successfully")
+    except Exception as e:
+        print(f"✗ Emergency blueprint registration failed: {e}")
     
     # Register community routes
     try:
         from app.routes import community
         app.register_blueprint(community.bp)
-    except ImportError:
-        pass  # Community routes not available yet
+        print("✓ Community blueprint registered successfully")
+    except Exception as e:
+        print(f"✗ Community blueprint registration failed: {e}")
     
     # Register contact routes
     try:
         from app.routes import contact
         app.register_blueprint(contact.bp)
-    except ImportError:
-        pass  # Contact routes not available yet
+        print("✓ Contact blueprint registered successfully")
+    except Exception as e:
+        print(f"✗ Contact blueprint registration failed: {e}")
     
     # ------------------- Default route -------------------
     @app.route("/")

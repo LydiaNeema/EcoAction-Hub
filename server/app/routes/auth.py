@@ -12,24 +12,34 @@ bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 @bp.route('/register', methods=['POST'])
 def register():
     try:
+        print(f"Registration attempt - Raw data: {request.get_json()}")
         data = register_schema.load(request.get_json() or {})
+        print(f"Validated data: {data}")
 
         # Ensure email is unique
-        if User.query.filter_by(email=data['email']).first():
+        existing_user = User.query.filter_by(email=data['email']).first()
+        if existing_user:
+            print(f"Email {data['email']} already exists")
             return jsonify({'success': False, 'error': 'Email already registered'}), 409
 
+        print(f"Creating user with email: {data['email']}")
         user = User(email=data['email'])
         user.set_password(data['password'])
         db.session.add(user)
         db.session.flush()  # get user.id
+        print(f"User created with ID: {user.id}")
 
         # Create minimal profile
+        print(f"Creating profile for user {user.id} with name: {data.get('full_name')}")
         profile = Profile(user_id=user.id, full_name=data.get('full_name'))
         db.session.add(profile)
         db.session.commit()
+        print(f"Profile created with ID: {profile.id}")
 
         token = create_access_token(identity=str(user.id))
-        return jsonify({
+        print(f"Token created successfully")
+        
+        response_data = {
             'success': True,
             'token': token,
             'user': {
@@ -42,10 +52,17 @@ def register():
                 'user_id': profile.user_id,
                 'full_name': profile.full_name
             }
-        }), 201
+        }
+        print(f"Registration successful for {user.email}")
+        return jsonify(response_data), 201
+        
     except ValidationError as e:
+        print(f"Validation error: {e.messages}")
         return jsonify({'success': False, 'error': 'Validation error', 'details': e.messages}), 400
     except Exception as e:
+        print(f"Registration error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
 
