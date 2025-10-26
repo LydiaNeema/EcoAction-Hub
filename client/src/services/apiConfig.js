@@ -12,6 +12,7 @@ export const endpoints = {
   community: `${API_BASE}/community`,
   reports: `${API_BASE}/reports`,
   users: `${API_BASE}/users`,
+  contact: `${API_BASE}/contact`,
 };
 
 export default API_BASE;

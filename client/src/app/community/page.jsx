@@ -1,54 +1,292 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from '@/components/Navbar';
-import { Search, Users, Target, Calendar, Leaf, MapPin, Clock, Plus } from "lucide-react";
+import { Search, MapPin, Clock, Leaf, X, Upload } from "lucide-react";
+import communityService from '@/services/communityService';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Page() {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All categories");
-
-  const stats = [
-    { title: "Active Actions", value: "6", color: "text-gray-900" },
-    { title: "Total Participants", value: "453", color: "text-gray-900" },
-    { title: "Your Actions", value: "8", color: "text-gray-900" },
-    { title: "This month", value: "6", color: "text-gray-900" }
-  ];
-
-  const communityActions = [
-    {
-      id: 1,
-      title: "Tree planting",
-      description: "Join us to plant 100 native trees and restore the park...",
-      location: "Riverside Park, San Francisco",
-      date: "Oct 18, 2025, 9:00 AM",
-      participants: "100 trees, 50 tons CO2/year",
-      image: "/CommunityTreeplanting.jpeg",
-      category: "Environment"
-    },
-    {
-      id: 2,
-      title: "Beach cleanup",
-      description: "Help remove plastic waste and debris from our beautiful beach",
-      location: "River side Beach, San Francisco",
-      date: "Oct 16, 2025, 9:00 AM",
-      participants: "100 trees, 50 tons CO2/year",
-      image: "/CoastCleaning.jpeg",
-      category: "Environment"
-    },
-    {
-      id: 3,
-      title: "Urban Garden Project",
-      description: "Help establish a community garden to grow fresh produce",
-      location: "Riverside Park, San Francisco",
-      date: "Oct 18, 2025, 9:00 AM",
-      participants: "100 trees, 50 tons CO2/year",
-      image: "/UrbanGardening.jpeg",
-      category: "Agriculture"
-    }
-  ];
+  const [joinedActions, setJoinedActions] = useState(new Set());
+  const [allActions, setAllActions] = useState([]);
+  const [communityActions, setCommunityActions] = useState([]);
+  const [displayedActions, setDisplayedActions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    active_actions: 0,
+    total_participants: 0,
+    your_actions: 0
+  });
+  const [itemsToShow, setItemsToShow] = useState(3);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [proposals, setProposals] = useState([]);
+  const [showProposalsModal, setShowProposalsModal] = useState(false);
+  
+  const userRole = user?.role || 'user';
 
   const categories = ["All categories", "Environment", "Agriculture", "Conservation", "Education"];
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchActions();
+    fetchStats();
+    fetchMyActions();
+  }, []);
+
+  // Fetch proposals when user role changes
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      fetchProposals();
+    }
+  }, [user]);
+
+  // Filter actions when search or category changes
+  useEffect(() => {
+    filterActions();
+  }, [searchTerm, selectedCategory, allActions]);
+
+  // Update displayed actions when filtered actions or items to show changes
+  useEffect(() => {
+    setDisplayedActions(communityActions.slice(0, itemsToShow));
+  }, [communityActions, itemsToShow]);
+
+  const fetchActions = async () => {
+    try {
+      setLoading(true);
+      const data = await communityService.getActions({
+        status: 'active'
+      });
+      setAllActions(data.actions || []);
+      setCommunityActions(data.actions || []);
+    } catch (err) {
+      console.error('Failed to fetch actions:', err);
+      // Fallback to static data if API fails
+      const fallbackData = [
+        {
+          id: 1,
+          title: "Tree planting",
+          description: "Join us to plant 100 native trees and restore the park...",
+          location: "Riverside Park, San Francisco",
+          date: "2025-10-18T09:00:00",
+          participants_count: 25,
+          impact_metric: "100 trees, 50 tons CO2/year",
+          image: "/CommunityTreeplanting.jpeg",
+          category: "Environment"
+        },
+        {
+          id: 2,
+          title: "Beach cleanup",
+          description: "Help remove plastic waste and debris from our beautiful beach",
+          location: "River side Beach, San Francisco",
+          date: "2025-10-16T09:00:00",
+          participants_count: 40,
+          impact_metric: "500kg plastic removed",
+          image: "/CoastCleaning.jpeg",
+          category: "Environment"
+        },
+        {
+          id: 3,
+          title: "Urban Garden Project",
+          description: "Help establish a community garden to grow fresh produce",
+          location: "Riverside Park, San Francisco",
+          date: "2025-10-18T09:00:00",
+          participants_count: 15,
+          impact_metric: "Fresh produce for 50 families",
+          image: "/UrbanGardening.jpeg",
+          category: "Agriculture"
+        }
+      ];
+      setAllActions(fallbackData);
+      setCommunityActions(fallbackData);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const data = await communityService.getStats();
+      setStats(data.stats || { active_actions: 0, total_participants: 0 });
+    } catch (err) {
+      console.error('Failed to fetch stats:', err);
+    }
+  };
+
+  const fetchMyActions = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        // User not logged in, skip fetching joined actions
+        return;
+      }
+      const data = await communityService.getMyActions();
+      const actionIds = new Set(data.actions.map(a => a.id));
+      setJoinedActions(actionIds);
+    } catch (err) {
+      console.error('Failed to fetch my actions:', err);
+      // If error, user might not be logged in or token expired
+    }
+  };
+
+
+  const fetchProposals = async () => {
+    try {
+      const data = await communityService.getProposals();
+      setProposals(data.proposals || []);
+    } catch (err) {
+      console.error('Failed to fetch proposals:', err);
+    }
+  };
+
+  const filterActions = () => {
+    let filtered = [...allActions];
+
+    // Filter by category
+    if (selectedCategory !== "All categories") {
+      filtered = filtered.filter(action => action.category === selectedCategory);
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(action => 
+        action.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        action.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        action.location.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setCommunityActions(filtered);
+    setItemsToShow(3); // Reset items to show when filtering
+  };
+
+  const handleJoinAction = async (actionId) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      alert('Please login to join actions. Click on your profile to login or register.');
+      return;
+    }
+
+    try {
+      await communityService.joinAction(actionId);
+      setJoinedActions(prev => new Set([...prev, actionId]));
+      
+      // Update the participants count locally in both arrays
+      const updateAction = (action) => 
+        action.id === actionId 
+          ? { ...action, participants_count: (action.participants_count || 0) + 1 }
+          : action;
+      
+      setAllActions(prev => prev.map(updateAction));
+      setCommunityActions(prev => prev.map(updateAction));
+      
+      // Refresh stats
+      fetchStats();
+      fetchMyActions();
+      
+      // Show success message
+      const action = communityActions.find(a => a.id === actionId);
+      alert(`✅ Successfully joined "${action?.title}"! You are now a participant.`);
+    } catch (err) {
+      alert(err.message || 'Failed to join action. Please try again.');
+    }
+  };
+
+  const handleLeaveAction = async (actionId) => {
+    try {
+      await communityService.leaveAction(actionId);
+      setJoinedActions(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(actionId);
+        return newSet;
+      });
+      
+      // Update the participants count locally in both arrays
+      const updateAction = (action) => 
+        action.id === actionId 
+          ? { ...action, participants_count: Math.max(0, (action.participants_count || 0) - 1) }
+          : action;
+      
+      setAllActions(prev => prev.map(updateAction));
+      setCommunityActions(prev => prev.map(updateAction));
+      
+      // Refresh stats
+      fetchStats();
+      fetchMyActions();
+      
+      const action = communityActions.find(a => a.id === actionId);
+      alert(`You have left "${action?.title}". You can rejoin anytime!`);
+    } catch (err) {
+      alert(err.message || 'Failed to leave action. Please try again.');
+    }
+  };
+
+  const handleLoadMore = () => {
+    setItemsToShow(prev => prev + 3);
+  };
+
+  const handleCreateAction = async (formData) => {
+    try {
+      await communityService.createAction(formData);
+      setShowCreateModal(false);
+      
+      if (userRole === 'admin') {
+        alert('✅ Action created and published successfully!');
+        fetchActions();
+      } else {
+        alert('✅ Action proposal submitted! An admin will review it shortly.');
+      }
+      
+      fetchStats();
+    } catch (err) {
+      alert(err.message || 'Failed to create action. Please make sure you are logged in.');
+    }
+  };
+
+  const handleApproveProposal = async (actionId) => {
+    try {
+      await communityService.approveProposal(actionId);
+      alert('✅ Proposal approved and published!');
+      fetchProposals();
+      fetchActions();
+      fetchStats();
+    } catch (err) {
+      alert(err.message || 'Failed to approve proposal');
+    }
+  };
+
+  const handleRejectProposal = async (actionId) => {
+    try {
+      await communityService.rejectProposal(actionId);
+      alert('Proposal rejected');
+      fetchProposals();
+    } catch (err) {
+      alert(err.message || 'Failed to reject proposal');
+    }
+  };
+
+  const handleMarkComplete = async (actionId) => {
+    try {
+      await communityService.markActionComplete(actionId);
+      alert('✅ Action marked as completed!');
+      fetchActions();
+    } catch (err) {
+      alert(err.message || 'Failed to mark action as complete');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -61,12 +299,35 @@ export default function Page() {
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Community Actions</h1>
-              <p className="text-gray-600 mt-1">Join real initiatives and make real difference in your community</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Community Actions
+                {userRole === 'admin' && <span className="ml-3 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">Admin</span>}
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {userRole === 'admin' 
+                  ? 'Manage community actions and review proposals' 
+                  : 'Join real initiatives and make real difference in your community'}
+              </p>
             </div>
-            <button className="bg-[#16A34A] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#15803D]">
-              Start New Action
-            </button>
+            <div className="flex gap-3">
+              {userRole === 'admin' && proposals.length > 0 && (
+                <button 
+                  onClick={() => setShowProposalsModal(true)}
+                  className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
+                >
+                  Review Proposals
+                  <span className="bg-white text-purple-600 px-2 py-0.5 rounded-full text-sm font-bold">
+                    {proposals.length}
+                  </span>
+                </button>
+              )}
+              <button 
+                onClick={() => setShowCreateModal(true)}
+                className="bg-[#16A34A] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#15803D]"
+              >
+                {userRole === 'admin' ? 'Add New Action' : 'Propose Action'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -107,78 +368,414 @@ export default function Page() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl border border-gray-200 p-6">
-              <div className="text-center">
-                <div className={`text-3xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
-                <div className="text-gray-600 text-sm">{stat.title}</div>
-              </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-gray-900 mb-2">{stats.active_actions || communityActions.length}</div>
+              <div className="text-gray-600 text-sm">Active Actions</div>
             </div>
-          ))}
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-gray-900 mb-2">{stats.total_participants || 0}</div>
+              <div className="text-gray-600 text-sm">Total Participants</div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-gray-900 mb-2">{joinedActions.size}</div>
+              <div className="text-gray-600 text-sm">Your Actions</div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-gray-900 mb-2">{communityActions.length}</div>
+              <div className="text-gray-600 text-sm">This month</div>
+            </div>
+          </div>
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            <p className="mt-4 text-gray-600">Loading actions...</p>
+          </div>
+        )}
+
+        {/* No Results */}
+        {!loading && displayedActions.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No community actions found. Try adjusting your filters.</p>
+          </div>
+        )}
 
         {/* Community Actions Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {communityActions.map((action) => (
-            <div key={action.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
-              {/* Image */}
-              <div className="aspect-video relative overflow-hidden">
-                <Image
-                  src={action.image}
-                  alt={action.title}
-                  width={400}
-                  height={250}
-                  className="w-full h-full object-cover"
-                  priority={action.id <= 3}
-                />
-              </div>
+        {!loading && displayedActions.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedActions.map((action) => {
+                const isJoined = joinedActions.has(action.id);
+                return (
+                  <div key={action.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+                    {/* Image */}
+                    <div className="aspect-video relative overflow-hidden">
+                      <Image
+                        src={action.image || "/CommunityTreeplanting.jpeg"}
+                        alt={action.title}
+                        width={400}
+                        height={250}
+                        className="w-full h-full object-cover"
+                        priority={action.id <= 3}
+                      />
+                    </div>
 
-              {/* Content */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{action.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{action.description}</p>
+                    {/* Content */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{action.title}</h3>
+                      <p className="text-gray-600 text-sm mb-4">{action.description}</p>
 
-                {/* Location */}
-                <div className="flex items-center gap-3 text-gray-700 text-sm mb-3">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <MapPin className="w-4 h-4 text-gray-900" />
+                      {/* Location */}
+                      <div className="flex items-center gap-3 text-gray-700 text-sm mb-3">
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                          <MapPin className="w-4 h-4 text-gray-900" />
+                        </div>
+                        <span>{action.location}</span>
+                      </div>
+
+                      {/* Date */}
+                      <div className="flex items-center gap-3 text-gray-700 text-sm mb-3">
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                          <Clock className="w-4 h-4 text-gray-900" />
+                        </div>
+                        <span>{formatDate(action.date)}</span>
+                      </div>
+
+                      {/* Participants */}
+                      <div className="flex items-center gap-3 text-gray-700 text-sm mb-4">
+                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                          <Leaf className="w-4 h-4 text-gray-900" />
+                        </div>
+                        <span>{action.participants_count || 0} participants • {action.impact_metric || "Making an impact"}</span>
+                      </div>
+
+                      {/* Action Buttons */}
+                      {userRole === 'admin' ? (
+                        <button 
+                          onClick={() => handleMarkComplete(action.id)}
+                          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                        >
+                          MARK AS COMPLETED
+                        </button>
+                      ) : (
+                        <>
+                          {isJoined ? (
+                            <button 
+                              onClick={() => handleLeaveAction(action.id)}
+                              className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                            >
+                              LEAVE ACTION
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleJoinAction(action.id)}
+                              className="w-full bg-[#16A34A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#15803D] transition-colors"
+                            >
+                              JOIN ACTION
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <span>{action.location}</span>
-                </div>
+                );
+              })}
+            </div>
 
-                {/* Date */}
-                <div className="flex items-center gap-3 text-gray-700 text-sm mb-4">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <Clock className="w-4 h-4 text-gray-900" />
-                  </div>
-                  <span>{action.date}</span>
-                </div>
-
-                {/* Impact */}
-                <div className="flex items-center gap-3 text-gray-700 text-sm mb-4">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
-                    <Leaf className="w-4 h-4 text-gray-900" />
-                  </div>
-                  <span>{action.participants}</span>
-                </div>
-
-                {/* Join Button */}
-                <button className="w-full bg-[#16A34A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#15803D] transition-colors">
-                  JOIN ACTION
+            {/* Load More - Functional */}
+            {displayedActions.length < communityActions.length && (
+              <div className="text-center mt-8">
+                <button 
+                  onClick={handleLoadMore}
+                  className="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Load More Actions ({communityActions.length - displayedActions.length} remaining)
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Load More */}
-        <div className="text-center mt-8">
-          <button className="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-            Load More Actions
-          </button>
-        </div>
+            )}
+          </>
+        )}
         </div>
       </main>
+
+      {/* Create Action Modal */}
+      {showCreateModal && (
+        <CreateActionModal 
+          onClose={() => setShowCreateModal(false)} 
+          onCreate={handleCreateAction}
+          userRole={userRole}
+        />
+      )}
+
+      {/* Proposals Review Modal (Admin Only) */}
+      {showProposalsModal && userRole === 'admin' && (
+        <ProposalsModal
+          proposals={proposals}
+          onClose={() => setShowProposalsModal(false)}
+          onApprove={handleApproveProposal}
+          onReject={handleRejectProposal}
+          formatDate={formatDate}
+        />
+      )}
+    </div>
+  );
+}
+
+// Create Action Modal Component
+function CreateActionModal({ onClose, onCreate, userRole }) {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: 'Environment',
+    location: '',
+    date: '',
+    image: '',
+    impact_metric: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await onCreate(formData);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {userRole === 'admin' ? 'Create New Action' : 'Propose Community Action'}
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Action Title *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="e.g., Tree Planting Event"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <textarea
+              required
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={4}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Describe your community action in detail..."
+            />
+          </div>
+
+          {/* Category and Date */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                required
+                value={formData.category}
+                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="Environment">Environment</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Conservation">Conservation</option>
+                <option value="Education">Education</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Date & Time *
+              </label>
+              <input
+                type="datetime-local"
+                required
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Location *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.location}
+              onChange={(e) => setFormData({...formData, location: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="e.g., Riverside Park, San Francisco"
+            />
+          </div>
+
+          {/* Image URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Image URL
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.image}
+                onChange={(e) => setFormData({...formData, image: e.target.value})}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder="https://example.com/image.jpg or /image.jpg"
+              />
+              <button
+                type="button"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                title="Upload image"
+              >
+                <Upload className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Enter an image URL or use local images like /CommunityTreeplanting.jpeg</p>
+          </div>
+
+          {/* Impact Metric */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Expected Impact
+            </label>
+            <input
+              type="text"
+              value={formData.impact_metric}
+              onChange={(e) => setFormData({...formData, impact_metric: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="e.g., 100 trees planted, 50 tons CO2/year"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 px-6 py-3 bg-[#16A34A] text-white rounded-lg font-medium hover:bg-[#15803D] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (userRole === 'admin' ? 'Creating...' : 'Submitting...') : (userRole === 'admin' ? 'Create Action' : 'Submit Proposal')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Proposals Review Modal Component (Admin Only)
+function ProposalsModal({ proposals, onClose, onApprove, onReject, formatDate }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">Review Action Proposals ({proposals.length})</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {proposals.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No pending proposals</p>
+            </div>
+          ) : (
+            proposals.map((proposal) => (
+              <div key={proposal.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{proposal.title}</h3>
+                    <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                      {proposal.category}
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    Proposed {formatDate(proposal.created_at)}
+                  </span>
+                </div>
+
+                <p className="text-gray-700 mb-4">{proposal.description}</p>
+
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="w-4 h-4" />
+                    <span>{proposal.location}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock className="w-4 h-4" />
+                    <span>{formatDate(proposal.date)}</span>
+                  </div>
+                </div>
+
+                {proposal.impact_metric && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                    <Leaf className="w-4 h-4" />
+                    <span>{proposal.impact_metric}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => onReject(proposal.id)}
+                    className="flex-1 px-4 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={() => onApprove(proposal.id)}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
+                  >
+                    Approve & Publish
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

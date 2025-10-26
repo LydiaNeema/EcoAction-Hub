@@ -35,6 +35,7 @@ def create_app():
     from app.models.achievements import Achievement, UserAchievement
     from app.models.emergency import EmergencyAlert, EmergencyReport, EmergencyContact
     from app.models.community import CommunityAction, ActionParticipant
+    from app.models.contact import ContactMessage
     
 
     # ------------------- Register blueprints -------------------
@@ -71,6 +72,13 @@ def create_app():
     except ImportError:
         pass  # Community routes not available yet
     
+    # Register contact routes
+    try:
+        from app.routes import contact
+        app.register_blueprint(contact.bp)
+    except ImportError:
+        pass  # Contact routes not available yet
+    
     # ------------------- Default route -------------------
     @app.route("/")
     def home():
@@ -88,7 +96,8 @@ def create_app():
                 'contacts': '/api/emergency/contacts',
                 'reports': '/api/emergency/reports',
                 'community_actions': '/api/community/actions',
-                'community_stats': '/api/community/stats'
+                'community_stats': '/api/community/stats',
+                'contact_messages': '/api/contact/messages'
             }
         }), 200
     return app
