@@ -1,8 +1,8 @@
 """updated migrations
 
-Revision ID: 8bb9a226f937
+Revision ID: 855f5e5476b3
 Revises: 
-Create Date: 2025-10-26 14:35:40.862452
+Create Date: 2025-10-26 15:29:51.169818
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8bb9a226f937'
+revision = '855f5e5476b3'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -105,6 +105,19 @@ def upgrade():
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['created_by'], ['users.id'], name=op.f('fk_community_actions_created_by_users')),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('contact_messages',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('email', sa.String(length=255), nullable=False),
+    sa.Column('category', sa.String(length=100), nullable=False),
+    sa.Column('subject', sa.String(length=200), nullable=False),
+    sa.Column('message', sa.Text(), nullable=False),
+    sa.Column('status', sa.String(length=50), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_contact_messages_user_id_users')),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('dashboard_stats',
@@ -222,6 +235,7 @@ def downgrade():
     op.drop_table('recent_activities')
     op.drop_table('profiles')
     op.drop_table('dashboard_stats')
+    op.drop_table('contact_messages')
     op.drop_table('community_actions')
     with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('ix_users_email'))
