@@ -4,6 +4,7 @@ import Image from "next/image";
 import Navbar from '@/components/Navbar';
 import { Search, MapPin, Clock, Leaf, X, Upload } from "lucide-react";
 import communityService from '@/services/communityService';
+import { getToken } from '@/utils/auth';
 
 export default function Page() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -104,7 +105,7 @@ export default function Page() {
 
   const fetchMyActions = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = getToken();
       if (!token) {
         // User not logged in, skip fetching joined actions
         return;
@@ -140,9 +141,9 @@ export default function Page() {
   };
 
   const handleJoinAction = async (actionId) => {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     if (!token) {
-      alert('Please login to join actions. Click on your profile to login or register.');
+      alert('Please login to join actions. Go to Sign In page to login or register.');
       return;
     }
 
