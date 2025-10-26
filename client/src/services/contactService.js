@@ -1,4 +1,5 @@
 import { endpoints } from './apiConfig';
+import { getToken } from '@/utils/auth';
 
 /**
  * Contact Service
@@ -31,7 +32,7 @@ const contactService = {
    * Get all contact messages (admin only)
    */
   async getMessages(filters = {}) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
@@ -65,7 +66,7 @@ const contactService = {
    * Get a specific message by ID (admin only)
    */
   async getMessage(messageId) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
@@ -89,7 +90,7 @@ const contactService = {
    * Update message status (admin only)
    */
   async updateMessageStatus(messageId, status) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
