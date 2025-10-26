@@ -15,7 +15,7 @@ class CommunityAction(db.Model, SerializerMixin):
     image = db.Column(db.String(500), nullable=True)
     participants_count = db.Column(db.Integer, default=0)
     impact_metric = db.Column(db.String(200), nullable=True)  # e.g., "100 trees, 50 tons CO2/year"
-    status = db.Column(db.String(50), default="active")  # active, completed, cancelled
+    status = db.Column(db.String(50), default="pending")  # pending, active, completed, rejected, cancelled
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

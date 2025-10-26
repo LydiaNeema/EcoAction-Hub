@@ -15,6 +15,7 @@ class LoginSchema(Schema):
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
     email = fields.Email()
+    role = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
 
