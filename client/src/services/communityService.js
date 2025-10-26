@@ -1,4 +1,5 @@
 import { endpoints } from './apiConfig';
+import { getToken } from '@/utils/auth';
 
 /**
  * Community Service
@@ -51,10 +52,10 @@ const communityService = {
    * Create a new community action
    */
   async createAction(actionData) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error('Authentication required. Please login to create actions.');
     }
 
     const response = await fetch(`${endpoints.community}/actions`, {
@@ -79,7 +80,7 @@ const communityService = {
    * Update an existing action
    */
   async updateAction(actionId, actionData) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
@@ -107,7 +108,7 @@ const communityService = {
    * Delete an action
    */
   async deleteAction(actionId) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
@@ -133,10 +134,10 @@ const communityService = {
    * Join a community action
    */
   async joinAction(actionId) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
-      throw new Error('Authentication required');
+      throw new Error('Authentication required. Please login to join actions.');
     }
 
     const response = await fetch(`${endpoints.community}/actions/${actionId}/join`, {
@@ -159,7 +160,7 @@ const communityService = {
    * Leave a community action
    */
   async leaveAction(actionId) {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
@@ -185,7 +186,7 @@ const communityService = {
    * Get actions the current user has joined
    */
   async getMyActions() {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
@@ -215,111 +216,6 @@ const communityService = {
       throw new Error('Failed to fetch statistics');
     }
     
-    const data = await response.json();
-    return data;
-  },
-
-  // ==================== ADMIN FUNCTIONS ====================
-
-  /**
-   * Get all pending proposals (admin only)
-   */
-  async getProposals() {
-    const token = localStorage.getItem('access_token');
-    
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${endpoints.community}/admin/proposals`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch proposals');
-    }
-
-    const data = await response.json();
-    return data;
-  },
-
-  /**
-   * Approve a pending proposal (admin only)
-   */
-  async approveProposal(actionId) {
-    const token = localStorage.getItem('access_token');
-    
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${endpoints.community}/admin/proposals/${actionId}/approve`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to approve proposal');
-    }
-
-    const data = await response.json();
-    return data;
-  },
-
-  /**
-   * Reject a pending proposal (admin only)
-   */
-  async rejectProposal(actionId) {
-    const token = localStorage.getItem('access_token');
-    
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${endpoints.community}/admin/proposals/${actionId}/reject`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to reject proposal');
-    }
-
-    const data = await response.json();
-    return data;
-  },
-
-  /**
-   * Mark an action as completed (admin only)
-   */
-  async markActionComplete(actionId) {
-    const token = localStorage.getItem('access_token');
-    
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${endpoints.community}/admin/actions/${actionId}/complete`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to mark action as complete');
-    }
-
     const data = await response.json();
     return data;
   }

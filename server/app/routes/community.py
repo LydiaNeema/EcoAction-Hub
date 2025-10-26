@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.community import CommunityAction, ActionParticipant
-from app.models.auth import User
 from app.schemas.community import CommunityActionCreate, CommunityActionUpdate
 from datetime import datetime
 from pydantic import ValidationError
@@ -97,10 +96,6 @@ def create_action():
         # Convert date string to datetime
         action_date = datetime.fromisoformat(validated_data.date.replace('Z', '+00:00'))
         
-        # Check if user is admin
-        user = User.query.get(current_user_id)
-        action_status = 'active' if user and user.role == 'admin' else 'pending'
-        
         # Create action
         action = CommunityAction(
             title=validated_data.title,
@@ -110,7 +105,6 @@ def create_action():
             date=action_date,
             image=validated_data.image,
             impact_metric=validated_data.impact_metric,
-            status=action_status,
             created_by=current_user_id
         )
         
@@ -378,167 +372,6 @@ def get_stats():
         }), 200
         
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-# ==================== ADMIN ROUTES ====================
-
-@bp.route('/admin/proposals', methods=['GET'])
-@jwt_required()
-def get_proposals():
-    """Get all pending action proposals (admin only)"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user or user.role != 'admin':
-            return jsonify({
-                'success': False,
-                'error': 'Admin access required'
-            }), 403
-        
-        # Get all pending actions
-        proposals = CommunityAction.query.filter_by(status='pending').order_by(CommunityAction.created_at.desc()).all()
-        
-        return jsonify({
-            'success': True,
-            'proposals': [action.to_dict() for action in proposals],
-            'count': len(proposals)
-        }), 200
-        
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-@bp.route('/admin/proposals/<int:action_id>/approve', methods=['POST'])
-@jwt_required()
-def approve_proposal(action_id):
-    """Approve a pending action proposal (admin only)"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user or user.role != 'admin':
-            return jsonify({
-                'success': False,
-                'error': 'Admin access required'
-            }), 403
-        
-        action = CommunityAction.query.get(action_id)
-        
-        if not action:
-            return jsonify({
-                'success': False,
-                'error': 'Action not found'
-            }), 404
-        
-        if action.status != 'pending':
-            return jsonify({
-                'success': False,
-                'error': 'Action is not pending'
-            }), 400
-        
-        action.status = 'active'
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Action approved successfully',
-            'action': action.to_dict()
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-@bp.route('/admin/proposals/<int:action_id>/reject', methods=['POST'])
-@jwt_required()
-def reject_proposal(action_id):
-    """Reject a pending action proposal (admin only)"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user or user.role != 'admin':
-            return jsonify({
-                'success': False,
-                'error': 'Admin access required'
-            }), 403
-        
-        action = CommunityAction.query.get(action_id)
-        
-        if not action:
-            return jsonify({
-                'success': False,
-                'error': 'Action not found'
-            }), 404
-        
-        if action.status != 'pending':
-            return jsonify({
-                'success': False,
-                'error': 'Action is not pending'
-            }), 400
-        
-        action.status = 'rejected'
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Action rejected',
-            'action': action.to_dict()
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-
-@bp.route('/admin/actions/<int:action_id>/complete', methods=['POST'])
-@jwt_required()
-def mark_action_complete(action_id):
-    """Mark an action as completed (admin only)"""
-    try:
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        
-        if not user or user.role != 'admin':
-            return jsonify({
-                'success': False,
-                'error': 'Admin access required'
-            }), 403
-        
-        action = CommunityAction.query.get(action_id)
-        
-        if not action:
-            return jsonify({
-                'success': False,
-                'error': 'Action not found'
-            }), 404
-        
-        action.status = 'completed'
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Action marked as completed',
-            'action': action.to_dict()
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
         return jsonify({
             'success': False,
             'error': str(e)

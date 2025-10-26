@@ -4,10 +4,9 @@ import Image from "next/image";
 import Navbar from '@/components/Navbar';
 import { Search, MapPin, Clock, Leaf, X, Upload } from "lucide-react";
 import communityService from '@/services/communityService';
-import { useAuth } from '@/context/AuthContext';
+import { getToken } from '@/utils/auth';
 
 export default function Page() {
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All categories");
   const [joinedActions, setJoinedActions] = useState(new Set());
@@ -22,10 +21,6 @@ export default function Page() {
   });
   const [itemsToShow, setItemsToShow] = useState(3);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [proposals, setProposals] = useState([]);
-  const [showProposalsModal, setShowProposalsModal] = useState(false);
-  
-  const userRole = user?.role || 'user';
 
   const categories = ["All categories", "Environment", "Agriculture", "Conservation", "Education"];
 
@@ -35,13 +30,6 @@ export default function Page() {
     fetchStats();
     fetchMyActions();
   }, []);
-
-  // Fetch proposals when user role changes
-  useEffect(() => {
-    if (user?.role === 'admin') {
-      fetchProposals();
-    }
-  }, [user]);
 
   // Filter actions when search or category changes
   useEffect(() => {
@@ -117,7 +105,7 @@ export default function Page() {
 
   const fetchMyActions = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = getToken();
       if (!token) {
         // User not logged in, skip fetching joined actions
         return;
@@ -128,16 +116,6 @@ export default function Page() {
     } catch (err) {
       console.error('Failed to fetch my actions:', err);
       // If error, user might not be logged in or token expired
-    }
-  };
-
-
-  const fetchProposals = async () => {
-    try {
-      const data = await communityService.getProposals();
-      setProposals(data.proposals || []);
-    } catch (err) {
-      console.error('Failed to fetch proposals:', err);
     }
   };
 
@@ -163,9 +141,9 @@ export default function Page() {
   };
 
   const handleJoinAction = async (actionId) => {
-    const token = localStorage.getItem('access_token');
+    const token = getToken();
     if (!token) {
-      alert('Please login to join actions. Click on your profile to login or register.');
+      alert('Please login to join actions. Go to Sign In page to login or register.');
       return;
     }
 
@@ -231,49 +209,12 @@ export default function Page() {
     try {
       await communityService.createAction(formData);
       setShowCreateModal(false);
-      
-      if (userRole === 'admin') {
-        alert('✅ Action created and published successfully!');
-        fetchActions();
-      } else {
-        alert('✅ Action proposal submitted! An admin will review it shortly.');
-      }
-      
+      // Refresh the actions list
+      fetchActions();
       fetchStats();
+      alert('Action created successfully!');
     } catch (err) {
       alert(err.message || 'Failed to create action. Please make sure you are logged in.');
-    }
-  };
-
-  const handleApproveProposal = async (actionId) => {
-    try {
-      await communityService.approveProposal(actionId);
-      alert('✅ Proposal approved and published!');
-      fetchProposals();
-      fetchActions();
-      fetchStats();
-    } catch (err) {
-      alert(err.message || 'Failed to approve proposal');
-    }
-  };
-
-  const handleRejectProposal = async (actionId) => {
-    try {
-      await communityService.rejectProposal(actionId);
-      alert('Proposal rejected');
-      fetchProposals();
-    } catch (err) {
-      alert(err.message || 'Failed to reject proposal');
-    }
-  };
-
-  const handleMarkComplete = async (actionId) => {
-    try {
-      await communityService.markActionComplete(actionId);
-      alert('✅ Action marked as completed!');
-      fetchActions();
-    } catch (err) {
-      alert(err.message || 'Failed to mark action as complete');
     }
   };
 
@@ -299,35 +240,15 @@ export default function Page() {
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Community Actions
-                {userRole === 'admin' && <span className="ml-3 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">Admin</span>}
-              </h1>
-              <p className="text-gray-600 mt-1">
-                {userRole === 'admin' 
-                  ? 'Manage community actions and review proposals' 
-                  : 'Join real initiatives and make real difference in your community'}
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">Community Actions</h1>
+              <p className="text-gray-600 mt-1">Join real initiatives and make real difference in your community</p>
             </div>
-            <div className="flex gap-3">
-              {userRole === 'admin' && proposals.length > 0 && (
-                <button 
-                  onClick={() => setShowProposalsModal(true)}
-                  className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
-                >
-                  Review Proposals
-                  <span className="bg-white text-purple-600 px-2 py-0.5 rounded-full text-sm font-bold">
-                    {proposals.length}
-                  </span>
-                </button>
-              )}
-              <button 
-                onClick={() => setShowCreateModal(true)}
-                className="bg-[#16A34A] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#15803D]"
-              >
-                {userRole === 'admin' ? 'Add New Action' : 'Propose Action'}
-              </button>
-            </div>
+            <button 
+              onClick={() => setShowCreateModal(true)}
+              className="bg-[#16A34A] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#15803D]"
+            >
+              Start New Action
+            </button>
           </div>
         </div>
 
@@ -458,32 +379,21 @@ export default function Page() {
                         <span>{action.participants_count || 0} participants • {action.impact_metric || "Making an impact"}</span>
                       </div>
 
-                      {/* Action Buttons */}
-                      {userRole === 'admin' ? (
+                      {/* Join Button - Fully Functional */}
+                      {isJoined ? (
                         <button 
-                          onClick={() => handleMarkComplete(action.id)}
-                          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                          onClick={() => handleLeaveAction(action.id)}
+                          className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
                         >
-                          MARK AS COMPLETED
+                          LEAVE ACTION
                         </button>
                       ) : (
-                        <>
-                          {isJoined ? (
-                            <button 
-                              onClick={() => handleLeaveAction(action.id)}
-                              className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                            >
-                              LEAVE ACTION
-                            </button>
-                          ) : (
-                            <button 
-                              onClick={() => handleJoinAction(action.id)}
-                              className="w-full bg-[#16A34A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#15803D] transition-colors"
-                            >
-                              JOIN ACTION
-                            </button>
-                          )}
-                        </>
+                        <button 
+                          onClick={() => handleJoinAction(action.id)}
+                          className="w-full bg-[#16A34A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#15803D] transition-colors"
+                        >
+                          JOIN ACTION
+                        </button>
                       )}
                     </div>
                   </div>
@@ -512,18 +422,6 @@ export default function Page() {
         <CreateActionModal 
           onClose={() => setShowCreateModal(false)} 
           onCreate={handleCreateAction}
-          userRole={userRole}
-        />
-      )}
-
-      {/* Proposals Review Modal (Admin Only) */}
-      {showProposalsModal && userRole === 'admin' && (
-        <ProposalsModal
-          proposals={proposals}
-          onClose={() => setShowProposalsModal(false)}
-          onApprove={handleApproveProposal}
-          onReject={handleRejectProposal}
-          formatDate={formatDate}
         />
       )}
     </div>
@@ -531,7 +429,7 @@ export default function Page() {
 }
 
 // Create Action Modal Component
-function CreateActionModal({ onClose, onCreate, userRole }) {
+function CreateActionModal({ onClose, onCreate }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -557,9 +455,7 @@ function CreateActionModal({ onClose, onCreate, userRole }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {userRole === 'admin' ? 'Create New Action' : 'Propose Community Action'}
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900">Create New Action</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="w-6 h-6" />
           </button>
@@ -696,85 +592,10 @@ function CreateActionModal({ onClose, onCreate, userRole }) {
               disabled={submitting}
               className="flex-1 px-6 py-3 bg-[#16A34A] text-white rounded-lg font-medium hover:bg-[#15803D] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? (userRole === 'admin' ? 'Creating...' : 'Submitting...') : (userRole === 'admin' ? 'Create Action' : 'Submit Proposal')}
+              {submitting ? 'Creating...' : 'Create Action'}
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  );
-}
-
-// Proposals Review Modal Component (Admin Only)
-function ProposalsModal({ proposals, onClose, onApprove, onReject, formatDate }) {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">Review Action Proposals ({proposals.length})</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-4">
-          {proposals.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">No pending proposals</p>
-            </div>
-          ) : (
-            proposals.map((proposal) => (
-              <div key={proposal.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{proposal.title}</h3>
-                    <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                      {proposal.category}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    Proposed {formatDate(proposal.created_at)}
-                  </span>
-                </div>
-
-                <p className="text-gray-700 mb-4">{proposal.description}</p>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <MapPin className="w-4 h-4" />
-                    <span>{proposal.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Clock className="w-4 h-4" />
-                    <span>{formatDate(proposal.date)}</span>
-                  </div>
-                </div>
-
-                {proposal.impact_metric && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                    <Leaf className="w-4 h-4" />
-                    <span>{proposal.impact_metric}</span>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={() => onReject(proposal.id)}
-                    className="flex-1 px-4 py-2 border border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50"
-                  >
-                    Reject
-                  </button>
-                  <button
-                    onClick={() => onApprove(proposal.id)}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
-                  >
-                    Approve & Publish
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
       </div>
     </div>
   );
