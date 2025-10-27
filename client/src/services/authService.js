@@ -97,5 +97,75 @@ export const authService = {
       console.error('Me request error:', error);
       throw new Error(error.message || 'Network error fetching user data');
     }
+  },
+
+  async forgotPassword({ email }) {
+    try {
+      console.log('=== FORGOT PASSWORD DEBUG ===');
+      console.log('API_BASE:', API_BASE);
+      console.log('Full URL:', `${API_BASE}/auth/forgot-password`);
+      console.log('Request data:', { email });
+      
+      const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      
+      console.log('Response status:', res.status);
+      console.log('Response ok:', res.ok);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.log('Error response body:', errorText);
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      console.log('Response data:', data);
+      
+      if (data.success === false) {
+        throw new Error(data.error || 'Failed to send reset email');
+      }
+      return data;
+    } catch (error) {
+      console.error('Forgot password error details:', error);
+      throw new Error(error.message || 'Network error during password reset request');
+    }
+  },
+
+  async resetPassword({ token, password }) {
+    try {
+      console.log('=== RESET PASSWORD DEBUG ===');
+      console.log('API_BASE:', API_BASE);
+      console.log('Full URL:', `${API_BASE}/auth/reset-password`);
+      console.log('Request data:', { token, password: '***' });
+      
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password })
+      });
+      
+      console.log('Response status:', res.status);
+      console.log('Response ok:', res.ok);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.log('Error response body:', errorText);
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      console.log('Response data:', data);
+      
+      if (data.success === false) {
+        throw new Error(data.error || 'Failed to reset password');
+      }
+      return data;
+    } catch (error) {
+      console.error('Reset password error details:', error);
+      throw new Error(error.message || 'Network error during password reset');
+    }
   }
 };
