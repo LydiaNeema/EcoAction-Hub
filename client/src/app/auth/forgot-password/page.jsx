@@ -1,20 +1,12 @@
 "use client";
-<<<<<<< HEAD
-import { useState, useEffect ,Suspense} from "react";
-=======
 import { useState, useEffect, Suspense } from "react";
->>>>>>> a9ae385 (Fix: Wrap useSearchParams in Suspense boundary)
 import Link from "next/link";
 import Image from "next/image";
 import { authService } from "@/services/authService";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
 
-<<<<<<< HEAD
-export default function ResetPasswordForm() {
-=======
 function ResetPasswordForm() {
->>>>>>> a9ae385 (Fix: Wrap useSearchParams in Suspense boundary)
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
