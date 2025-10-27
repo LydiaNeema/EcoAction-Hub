@@ -1,16 +1,16 @@
 "use client";
-import { useState, useEffect ,Suspense} from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { authService } from "@/services/authService";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
 
-export default function ResetPasswordForm() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,17 +32,14 @@ export default function ResetPasswordForm() {
       setError("Please enter a new password");
       return;
     }
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     if (!token) {
       setError("Invalid reset token");
       return;
@@ -53,8 +50,6 @@ export default function ResetPasswordForm() {
     try {
       await authService.resetPassword({ token, password });
       setSuccess(true);
-      
-      // Redirect to signin after 3 seconds
       setTimeout(() => {
         router.push("/auth/signin");
       }, 3000);
@@ -75,15 +70,10 @@ export default function ResetPasswordForm() {
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
             </div>
-            
-            <h1 className="text-2xl font-semibold text-gray-900 mb-3">
-              Password Reset!
-            </h1>
-            
+            <h1 className="text-2xl font-semibold text-gray-900 mb-3">Password Reset!</h1>
             <p className="text-gray-600 mb-6">
               Your password has been successfully reset. Redirecting you to sign in...
             </p>
-            
             <Link
               href="/auth/signin"
               className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-green-700 transition"
@@ -99,7 +89,6 @@ export default function ResetPasswordForm() {
   return (
     <main className="min-h-screen bg-[#F1FFF6] flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
-        {/* Branding */}
         <div className="flex flex-col items-center text-center mb-8">
           <div className="flex items-center gap-2 mb-1">
             <Image src="/EcoActionlogo.png" width={40} height={40} alt="EcoAction Logo" />
@@ -110,9 +99,7 @@ export default function ResetPasswordForm() {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={onSubmit} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          {/* New Password */}
           <label className="block text-sm font-medium text-gray-700 mb-1">
             New Password
           </label>
@@ -133,7 +120,6 @@ export default function ResetPasswordForm() {
             </button>
           </div>
 
-          {/* Confirm Password */}
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Confirm New Password
           </label>
@@ -154,7 +140,6 @@ export default function ResetPasswordForm() {
             </button>
           </div>
 
-          {/* Password Requirements */}
           <div className="bg-gray-50 rounded-xl p-3 mb-4">
             <p className="text-gray-700 text-sm font-medium mb-2">Password must:</p>
             <ul className="text-gray-600 text-sm space-y-1">
@@ -167,14 +152,12 @@ export default function ResetPasswordForm() {
             </ul>
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4">
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
 
-          {/* Submit Button */}
           <button
             disabled={loading || !token}
             type="submit"
@@ -184,12 +167,8 @@ export default function ResetPasswordForm() {
           </button>
         </form>
 
-        {/* Back to Sign In */}
         <div className="text-center mt-6">
-          <Link 
-            href="/auth/signin" 
-            className="text-green-600 font-medium hover:underline"
-          >
+          <Link href="/auth/signin" className="text-green-600 font-medium hover:underline">
             Back to Sign In
           </Link>
         </div>
@@ -198,13 +177,15 @@ export default function ResetPasswordForm() {
   );
 }
 
-export default function ResetPasswordPage() {
+export default function Page() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-[#F1FFF6] flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#F1FFF6] flex items-center justify-center">
+          <div className="text-gray-600">Loading...</div>
+        </main>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );
