@@ -91,7 +91,7 @@ export default function SignInPage() {
 
           {/* Forgot Password Link */}
           <div className="text-right mt-2">
-            <Link href="/auth/forgot-password" className="text-green-700 text-sm font-medium hover:underline">
+            <Link href="/auth/forgot-password/request" className="text-green-700 text-sm font-medium hover:underline">
               Forgot password?
             </Link>
           </div>
