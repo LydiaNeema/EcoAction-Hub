@@ -1,0 +1,113 @@
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+
+export default function SignUpPage() {
+  const router = useRouter();
+  const { register } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!fullName.trim()) {
+      setError("Please enter your full name");
+      return;
+    }
+    if (!email.trim()) {
+      setError("Please enter your email address");
+      return;
+    }
+    if (!password.trim()) {
+      setError("Please enter a password");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+    if (!agree) {
+      setError("Please confirm you want to help your community");
+      return;
+    }
+    
+    setLoading(true);
+    setError("");
+    try {
+      const result = await register(fullName, email, password);
+      if (result.success) {
+        router.push("/dashboard");
+      } else {
+        setError(result.error || "Registration failed. Please try again.");
+      }
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-[#F1FFF6] flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md">
+  <div className="flex flex-col items-center text-center mb-8">
+  <div className="flex items-center gap-2 mb-1">
+    <Image src="/EcoActionlogo.png" width={40} height={40} alt="EcoAction Logo" />
+    <h1 className="text-2xl font-semibold text-gray-900">Join Eco Action Hub</h1>
+  </div>
+  <p className="text-gray-600 text-sm -mt-1">Start making a difference in your community</p>
+</div>
+
+
+
+        <form onSubmit={onSubmit} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+         
+
+          <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+          <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" placeholder="Your name" className="w-full mb-4 rounded-xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-green-500" />
+
+          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@example.com" className="w-full mb-4 rounded-xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-green-500" />
+
+          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:ring-2 focus:ring-green-500" />
+
+          <label className="flex items-center gap-2 text-sm text-gray-700 mt-4">
+            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="rounded border-gray-300" />
+            I want to help my community
+          </label>
+
+          {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+
+          <button disabled={loading} type="submit" className="w-full mt-6 bg-[#16A34A] text-white py-3 rounded-xl font-medium hover:bg-[#15803D] disabled:opacity-60">
+            {loading ? "Creating..." : "Create Account"}
+          </button>
+
+          <div className="my-6 flex items-center gap-4">
+            <div className="flex-1 h-px bg-gray-300" />
+            <span className="text-gray-500 text-sm">or</span>
+            <div className="flex-1 h-px bg-gray-300" />
+          </div>
+
+          <button type="button" className="w-full bg-white border border-gray-300 rounded-xl py-3 flex items-center justify-center gap-3 hover:bg-gray-50">
+            <Image src="/google.svg" alt="google" width={20} height={20} />
+            <span className="text-gray-700">Continue with Google</span>
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-700 mt-4">
+          Already have an account ? <Link href="/auth/signin" className="text-green-600 font-medium">Sign in</Link>
+        </p>
+      </div>
+    </main>
+  );
+}
