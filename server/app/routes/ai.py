@@ -14,15 +14,13 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 openai_client = None
 
 # Debug
-print(f"AI Route - OpenAI API Key available: {OPENAI_API_KEY is not None}")
+print(f"AI Route - OpenAI API Key available: {bool(OPENAI_API_KEY)}")
 if OPENAI_API_KEY:
     try:
-        import openai
+        from openai import OpenAI
         print(f"Setting OpenAI API key: {OPENAI_API_KEY[:15]}...")
-        # Use the simpler approach for older versions
-        openai.api_key = OPENAI_API_KEY
-        # Create a simple client reference
-        openai_client = openai
+        # Initialize the modern OpenAI client
+        openai_client = OpenAI(api_key=OPENAI_API_KEY)
         print("OpenAI client initialized successfully!")
     except ImportError:
         print("Warning: openai package not installed. Install with: pip install openai")
@@ -39,7 +37,7 @@ def get_ai_response(message):
         try:
             # Use OpenAI API
             print(f"Calling OpenAI API for message: {message[:30]}...")
-            completion = openai_client.ChatCompletion.create(
+            completion = openai_client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {

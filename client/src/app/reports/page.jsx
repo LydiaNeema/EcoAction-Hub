@@ -234,50 +234,75 @@ export default function ReportsPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-3">
                       Photo Evidence (Optional)
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors cursor-pointer">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <label
-                        htmlFor="image-upload"
-                        className="cursor-pointer flex flex-col items-center justify-center"
-                      >
-                        <Icon icon="lucide:upload" className="w-8 h-8 text-gray-400 mb-3" />
-                        <span className="text-sm text-gray-600 font-medium">
-                          Click to upload or drag and drop
-                        </span>
-                        <span className="text-xs text-gray-500 mt-1">
-                          PNG, JPG, GIF up to 10MB
-                        </span>
-                      </label>
-                    </div>
-
-                    {/* Preview uploaded images */}
-                    {formData.images.length > 0 && (
-                      <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {formData.images.map((image, index) => (
-                          <div key={index} className="relative group">
-                            <img
-                              src={URL.createObjectURL(image)}
-                              alt={`Upload ${index + 1}`}
-                              className="w-full h-24 object-cover rounded-lg"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeImage(index)}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors">
+                      {formData.images.length === 0 ? (
+                        <div className="text-center cursor-pointer">
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            id="image-upload"
+                          />
+                          <label
+                            htmlFor="image-upload"
+                            className="cursor-pointer flex flex-col items-center justify-center"
+                          >
+                            <Icon icon="lucide:upload" className="w-8 h-8 text-gray-400 mb-3" />
+                            <span className="text-sm text-gray-600 font-medium">
+                              Click to upload or drag and drop
+                            </span>
+                            <span className="text-xs text-gray-500 mt-1">
+                              PNG, JPG, GIF up to 10MB
+                            </span>
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {/* Upload more button */}
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-700">
+                              {formData.images.length} image(s) selected
+                            </span>
+                            <label
+                              htmlFor="image-upload-more"
+                              className="cursor-pointer bg-blue-50 text-blue-600 px-3 py-1 rounded-md text-sm font-medium hover:bg-blue-100 transition-colors"
                             >
-                              <Icon icon="lucide:x" className="w-3 h-3" />
-                            </button>
+                              Add More
+                            </label>
+                            <input
+                              type="file"
+                              multiple
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                              id="image-upload-more"
+                            />
                           </div>
-                        ))}
-                      </div>
-                    )}
+                          
+                          {/* Preview uploaded images inside the card */}
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {formData.images.map((image, index) => (
+                              <div key={index} className="relative group">
+                                <img
+                                  src={URL.createObjectURL(image)}
+                                  alt={`Upload ${index + 1}`}
+                                  className="w-full h-20 object-cover rounded-lg border border-gray-200"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                >
+                                  <Icon icon="lucide:x" className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Submit Button */}

@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.emergency import EmergencyAlert, EmergencyReport, EmergencyContact
+from app.models.auth import User
 from app.schemas.emergency import (
     emergency_alert_schema, emergency_alerts_schema,
     emergency_report_schema, emergency_reports_schema,
@@ -26,7 +28,7 @@ if OPENAI_API_KEY:
     except Exception as e:
         print(f"Warning: Could not initialize OpenAI client: {e}")
 
-def generate_ai_alerts(location="Nairobi County"):
+def generate_ai_alerts(location="Nairobi County", area=None):
     """Generate emergency alerts using OpenAI."""
     if not openai_client:
         return None
@@ -41,7 +43,7 @@ def generate_ai_alerts(location="Nairobi County"):
                 },
                 {
                     "role": "user",
-                    "content": f"Generate 3-5 realistic climate emergency alerts for {location}. Include floods, heat waves, air quality, or fire risks. Return as JSON array with fields: type, location, severity (Critical/High/Medium/Low), description, recommendation. Make them realistic for Nairobi's climate."
+                    "content": f"Generate 3-5 realistic climate emergency alerts for {location}{f', specifically {area}' if area else ''}. Include floods, heat waves, air quality, or fire risks. Return as JSON array with fields: type, location, severity (Critical/High/Medium/Low), description, recommendation. Make them realistic for Kenya's climate and current season."
                 }
             ],
             max_tokens=500,
@@ -64,7 +66,7 @@ def generate_ai_alerts(location="Nairobi County"):
         print(f"OpenAI alert generation error: {e}")
         return None
 
-def generate_ai_insights(location="Nairobi County"):
+def generate_ai_insights(location="Nairobi County", area=None):
     """Generate emergency insights using OpenAI."""
     if not openai_client:
         return None
@@ -79,7 +81,7 @@ def generate_ai_insights(location="Nairobi County"):
                 },
                 {
                     "role": "user",
-                    "content": f"Generate emergency insights for {location}. Include overall situation, active alerts count, affected areas, alert trend, and recommendations. Return as JSON with fields: title, description, recommendation, alertTrend, affectedAreas, county, activeAlerts."
+                    "content": f"Generate emergency insights for {location}{f', specifically {area}' if area else ''}. Include overall situation, active alerts count, affected areas, alert trend, and recommendations. Return as JSON with fields: title, description, recommendation, alertTrend, affectedAreas, county, activeAlerts. Make it relevant to current climate conditions in Kenya."
                 }
             ],
             max_tokens=300,
@@ -98,12 +100,28 @@ def generate_ai_insights(location="Nairobi County"):
         print(f"OpenAI insights generation error: {e}")
         return None
 
+def get_user_location():
+    """Get user location from their profile."""
+    try:
+        current_user_id = get_jwt_identity()
+        if current_user_id:
+            user = User.query.get(current_user_id)
+            if user and user.profile:
+                return user.profile.county or "Nairobi County", user.profile.area
+    except:
+        pass
+    return "Nairobi County", None
+
 # Get all active emergency alerts
 @bp.route('/alerts', methods=['GET'])
+@jwt_required(optional=True)
 def get_alerts():
     try:
+        # Get user location for personalized alerts
+        location, area = get_user_location()
+        
         # Try to generate AI alerts first
-        ai_alerts = generate_ai_alerts()
+        ai_alerts = generate_ai_alerts(location, area)
         
         if ai_alerts:
             return jsonify({
@@ -127,10 +145,14 @@ def get_alerts():
 
 # Get priority alerts (high severity)
 @bp.route('/alerts/priority', methods=['GET'])
+@jwt_required(optional=True)
 def get_priority_alerts():
     try:
+        # Get user location for personalized alerts
+        location, area = get_user_location()
+        
         # Try to generate AI alerts first
-        ai_alerts = generate_ai_alerts()
+        ai_alerts = generate_ai_alerts(location, area)
         
         if ai_alerts:
             # Filter for high priority
@@ -160,10 +182,14 @@ def get_priority_alerts():
 
 # Get emergency insights
 @bp.route('/insights', methods=['GET'])
+@jwt_required(optional=True)
 def get_insights():
     try:
+        # Get user location for personalized insights
+        location, area = get_user_location()
+        
         # Try to generate AI insights first
-        ai_insights = generate_ai_insights()
+        ai_insights = generate_ai_insights(location, area)
         
         if ai_insights:
             return jsonify({
@@ -206,7 +232,7 @@ def get_insights():
                 'recommendation': 'Continue monitoring for updates.',
                 'alertTrend': '0% This Week',
                 'affectedAreas': f'{affected_areas} Districts',
-                'county': 'Nairobi County',
+                'county': location,
                 'aiStatus': 'AI Powered',
                 'activeAlerts': total_active
             }

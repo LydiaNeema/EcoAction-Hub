@@ -57,9 +57,24 @@ export const authService = {
       console.log('Response headers:', [...res.headers.entries()]);
       
       if (!res.ok) {
-        const errorText = await res.text();
-        console.log('Error response body:', errorText);
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+        try {
+          const errorData = await res.json();
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // If response is not JSON, use status-specific messages
+          if (res.status === 401) {
+            errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+          } else if (res.status === 500) {
+            errorMessage = 'Server error. Please try again later or contact support.';
+          } else if (res.status === 0 || !navigator.onLine) {
+            errorMessage = 'Network error. Please check your internet connection and ensure the server is running.';
+          }
+        }
+        console.log('Error response body:', errorMessage);
+        throw new Error(errorMessage);
       }
       
       const data = await res.json();

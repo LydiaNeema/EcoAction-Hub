@@ -30,6 +30,6 @@ SQLAlchemy-serializer==1.4.12
 typing_extensions==4.13.2
 Werkzeug==3.0.6
 zipp==3.20.2
-openai==0.28.0
+openai==2.6.1
 pydantic==2.5.0
 email-validator==2.1.0

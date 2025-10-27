@@ -1,14 +1,17 @@
 "use client";
 import Navbar from "@/components/Navbar";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Users, AlertTriangle, TrendingUp, ArrowRight, Droplets, Flame, Wind } from "lucide-react";
 import { dashboardData } from "@/data/dashboardData";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { endpoints } from '@/services/apiConfig';
 
 export default function Dashboard() {
   const { user: authUser, loading: authLoading } = useAuth();
-  const { aiInsights, recentActivities } = dashboardData;
+  const { recentActivities } = dashboardData;
+  const [aiInsights, setAiInsights] = useState([]);
+  const [emergencyInsights, setEmergencyInsights] = useState(null);
   
   // Use logged-in user's name or fallback to static data
   const userName = authUser?.full_name?.split(' ')[0] || dashboardData.user.name;
@@ -25,6 +28,78 @@ export default function Dashboard() {
     impactThisMonth: userProfile.impact_this_month || 0,
     treesThisMonth: userProfile.trees_this_month || 0
   };
+
+  // Get auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  };
+
+  // Fetch emergency insights for dashboard
+  useEffect(() => {
+    const fetchEmergencyInsights = async () => {
+      try {
+        const response = await fetch(`${endpoints.emergency}/insights`, {
+          headers: getAuthHeaders()
+        });
+        const data = await response.json();
+        if (data.success) {
+          setEmergencyInsights(data.data);
+          
+          // Create dashboard-specific insights based on emergency data
+          const dashboardInsights = [
+            {
+              id: "climate-alerts",
+              title: "Climate Alerts",
+              description: `${data.data.activeAlerts || 0} active alerts in your area`,
+              icon: "AlertTriangle",
+              trend: data.data.alertTrend || "No change",
+              action: "View Emergency Page"
+            },
+            {
+              id: "affected-areas",
+              title: "Affected Areas", 
+              description: `${data.data.affectedAreas || 'No areas'} currently affected`,
+              icon: "Droplets",
+              trend: "Monitoring",
+              action: "View Details"
+            },
+            {
+              id: "community-impact",
+              title: "Community Impact",
+              description: `${userStats.communityImpact} actions joined`,
+              icon: "Users", 
+              trend: `+${userStats.impactThisMonth} this month`,
+              action: "Join More Actions"
+            },
+            {
+              id: "reports-submitted",
+              title: "Reports Submitted",
+              description: `${userStats.issuesReported} environmental issues reported`,
+              icon: "FileText",
+              trend: `+${userStats.issuesThisMonth} this month`, 
+              action: "Submit New Report"
+            }
+          ];
+          setAiInsights(dashboardInsights);
+        }
+      } catch (error) {
+        console.error('Error fetching emergency insights:', error);
+        // Fallback to static data if API fails
+        setAiInsights(dashboardData.aiInsights);
+      }
+    };
+
+    if (authUser) {
+      fetchEmergencyInsights();
+    } else {
+      // Use static data for non-authenticated users
+      setAiInsights(dashboardData.aiInsights);
+    }
+  }, [authUser, userStats]);
 
   // Icon mapping
   const iconComponents = {
@@ -142,11 +217,11 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {aiInsights.map((insight) => {
+              {aiInsights.map((insight, index) => {
                 const IconComponent = iconComponents[insight.icon];
 
                 return (
-                  <div key={insight.id} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                  <div key={insight.id || index} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="flex items-start gap-3 mb-4">
                       <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0">
                         <IconComponent className="w-5 h-5 text-gray-900" />
@@ -156,20 +231,9 @@ export default function Dashboard() {
                         <p className="text-gray-600 text-sm">{insight.description}</p>
                       </div>
                     </div>
-                    {insight.type === 'event' ? (
-                      <Link href="/community">
-                        <button className="text-sm bg-[rgba(32,165,41,1)] text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors">
-                          {insight.buttonText}
-                        </button>
-                        
-                      </Link>
-                    ) : (
-                      <Link href="/emergency">
-                        <button className="text-sm border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                          {insight.buttonText}
-                        </button>
-                      </Link>
-                    )}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <p className="text-xs text-gray-500 font-medium">{insight.trend}</p>
+                    </div>
                   </div>
                 );
               })}

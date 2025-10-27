@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, Droplets, Thermometer, Bell, Phone, Wind, Flame, X, Send } from 'lucide-react';
 import { Icon } from '@iconify/react';
 import Navbar from '@/components/Navbar';
+import { useAuth } from '@/context/AuthContext';
 import { endpoints } from '@/services/apiConfig';
 
 const API_BASE_URL = endpoints.emergency;
@@ -20,7 +21,7 @@ const getAlertIcon = (type) => {
 
 // Helper function to get color based on alert type
 const getAlertColor = (type) => {
-  if (type.toLowerCase().includes('flood')) return 'text-blue-600';
+  if (type.toLowerCase().includes('flood')) return 'text-cyan-600';
   if (type.toLowerCase().includes('heat')) return 'text-red-600';
   if (type.toLowerCase().includes('fire')) return 'text-orange-600';
   if (type.toLowerCase().includes('air')) return 'text-gray-600';
@@ -28,6 +29,7 @@ const getAlertColor = (type) => {
 };
 
 export default function EmergencyPage() {
+  const { user } = useAuth();
   const [selectedService, setSelectedService] = useState('Police');
   const [insights, setInsights] = useState(null);
   const [priorityAlerts, setPriorityAlerts] = useState([]);
@@ -51,9 +53,20 @@ export default function EmergencyPage() {
     severity: 'Medium'
   });
 
+  // Get auth headers
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    };
+  };
+
   // Fetch insights from AI-powered API
   useEffect(() => {
-    fetch(`${API_BASE_URL}/insights`)
+    fetch(`${API_BASE_URL}/insights`, {
+      headers: getAuthHeaders()
+    })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -61,11 +74,13 @@ export default function EmergencyPage() {
         }
       })
       .catch(error => console.error('Error fetching insights:', error));
-  }, []);
+  }, [user]);
 
   // Fetch priority alerts from AI-powered API
   useEffect(() => {
-    fetch(`${API_BASE_URL}/alerts/priority`)
+    fetch(`${API_BASE_URL}/alerts/priority`, {
+      headers: getAuthHeaders()
+    })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -79,7 +94,7 @@ export default function EmergencyPage() {
       })
       .catch(error => console.error('Error fetching priority alerts:', error))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user]);
 
   // Fetch emergency contacts based on selected service
   useEffect(() => {
@@ -94,26 +109,92 @@ export default function EmergencyPage() {
   }, [selectedService]);
 
   // Fetch all alerts for modal from AI-powered API
-  const fetchAllAlerts = () => {
-    fetch(`${API_BASE_URL}/alerts`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          const alertsWithIcons = data.data.map(alert => ({
+  const fetchAllAlerts = async () => {
+    try {
+      console.log('=== FETCH ALL ALERTS DEBUG ===');
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('Full URL:', `${API_BASE_URL}/alerts`);
+      console.log('Auth headers:', getAuthHeaders());
+      
+      const response = await fetch(`${API_BASE_URL}/alerts`, {
+        headers: getAuthHeaders()
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Response data:', data);
+      console.log('Data success:', data.success);
+      console.log('Data.data type:', typeof data.data);
+      console.log('Data.data is array:', Array.isArray(data.data));
+      console.log('Data.data length:', data.data?.length);
+      
+      if (data.success && data.data) {
+        let alertsToProcess = [];
+        
+        // Handle different data structures
+        if (Array.isArray(data.data)) {
+          alertsToProcess = data.data;
+        } else if (data.data.alerts && Array.isArray(data.data.alerts)) {
+          alertsToProcess = data.data.alerts;
+        } else {
+          console.warn('Unexpected data structure:', data.data);
+          alertsToProcess = [];
+        }
+        
+        console.log('Alerts to process:', alertsToProcess);
+        
+        if (alertsToProcess.length > 0) {
+          const alertsWithIcons = alertsToProcess.map((alert, index) => ({
             ...alert,
+            id: alert.id || `alert-${index}`,
             icon: getAlertIcon(alert.type),
             color: getAlertColor(alert.type)
           }));
+          console.log('Final processed alerts:', alertsWithIcons);
           setAllAlerts(alertsWithIcons);
+        } else {
+          console.log('No alerts found, using priority alerts as fallback');
+          setAllAlerts(priorityAlerts.length > 0 ? priorityAlerts : []);
         }
-      })
-      .catch(error => console.error('Error fetching all alerts:', error));
+      } else {
+        console.error('API response indicates failure:', data);
+        console.log('Using priority alerts as fallback');
+        setAllAlerts(priorityAlerts.length > 0 ? priorityAlerts : []);
+      }
+    } catch (error) {
+      console.error('Error fetching all alerts:', error);
+      console.log('Using priority alerts as fallback due to error');
+      setAllAlerts(priorityAlerts.length > 0 ? priorityAlerts : []);
+    }
   };
 
   // Handle view all alerts
-  const handleViewAllAlerts = () => {
-    fetchAllAlerts();
+  const handleViewAllAlerts = async () => {
+    console.log('=== VIEW ALL ALERTS CLICKED ===');
+    console.log('Current allAlerts state:', allAlerts);
+    console.log('Current priorityAlerts state:', priorityAlerts);
+    
+    // Show modal immediately with loading or existing data
     setShowAllAlertsModal(true);
+    
+    // If we have priority alerts, use them as initial data
+    if (priorityAlerts.length > 0) {
+      console.log('Using priority alerts as initial data');
+      setAllAlerts(priorityAlerts);
+    }
+    
+    // Then fetch fresh data
+    try {
+      await fetchAllAlerts();
+    } catch (error) {
+      console.error('Failed to fetch alerts, keeping existing data');
+    }
   };
 
   // Handle report emergency
@@ -138,9 +219,7 @@ export default function EmergencyPage() {
     try {
       const response = await fetch(`${API_BASE_URL}/reports`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(reportForm)
       });
       
@@ -179,92 +258,117 @@ export default function EmergencyPage() {
   return (
     <div className="flex">
       <Navbar />
-      <div className="flex-1 ml-64 h-screen overflow-y-auto bg-white p-6">
+      <div className="flex-1 ml-64 min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">Emergency Alerts</h1>
         <p className="text-gray-600">Stay informed about climate changes in your area</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Latest Insights Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex justify-between items-start mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Latest Insights Card - Takes 2 columns */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 lg:col-span-2 border border-gray-200">
+
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-gray-600 mb-1">Latest Insights</h2>
-              <p className="text-xs text-gray-500">Key recommendations for {insights?.county || 'Nairobi County'}</p>
+              <h2 className="text-lg font-bold text-gray-800 mb-1">AI Emergency Insights</h2>
+              <p className="text-sm text-gray-600">Personalized for {insights?.county || 'your area'}</p>
             </div>
-            <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-              {insights?.aiStatus || 'AI Powered'}
+            <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              Powered by AI
             </span>
           </div>
 
-          <div className="flex gap-4 mb-6">
-            <div className="flex-shrink-0">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
-                <AlertTriangle className="w-8 h-8 text-gray-900" strokeWidth={2.5} />
+          <div className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-orange-600" strokeWidth={2} />
+                </div>
               </div>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">{insights?.title || 'Loading...'}</h3>
-              <p className="text-sm text-gray-600 mb-3">{insights?.description || 'Fetching latest insights...'}</p>
-              <p className="text-sm text-gray-800">
-                <span className="font-semibold">Recommendation:</span> {insights?.recommendation || 'Stay informed'}
-              </p>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
+                  {insights?.title || 'Loading insights...'}
+                </h3>
+                <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+                  {insights?.description ? 
+                    (insights.description.length > 120 ? 
+                      insights.description.substring(0, 120) + '...' : 
+                      insights.description
+                    ) : 
+                    'Analyzing current environmental conditions in your area...'
+                  }
+                </p>
+                <div className="bg-white rounded-lg p-3 border-l-4 border-black-400  border-black">
+                  <p className="text-sm text-gray-800">
+                    <span className="font-semibold"> Recommendation:</span> {
+                      insights?.recommendation ? 
+                        (insights.recommendation.length > 80 ? 
+                          insights.recommendation.substring(0, 80) + '...' : 
+                          insights.recommendation
+                        ) : 
+                        'Stay alert and follow safety guidelines'
+                    }
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Alert Trend</p>
-              <p className="text-sm font-semibold text-gray-800">{insights?.alertTrend || 'N/A'}</p>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className="text-xs text-gray-500 mb-1">Active Alerts</p>
+              <p className="text-lg font-bold text-red-600">{insights?.activeAlerts || '0'}</p>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Affected Areas</p>
-              <p className="text-sm font-semibold text-gray-800">{insights?.affectedAreas || 'N/A'}</p>
+            <div className="text-center">
+              <p className="text-xs text-gray-500 mb-1">Trend</p>
+              <p className="text-sm font-semibold text-gray-800 truncate">{insights?.alertTrend || 'Stable'}</p>
             </div>
-            <button 
-              onClick={handleViewMoreInsights}
-              className="text-sm text-gray-700 hover:text-gray-900 font-medium underline"
-            >
-              View More Insights
-            </button>
+            <div className="text-center">
+              <button 
+                onClick={handleViewMoreInsights}
+                className="text-xs bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                View Details
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Priority Alerts Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <div className="flex justify-between items-start mb-6">
+        {/* Priority Alerts Card - Takes 1 column */}
+        <div className="bg-white rounded-2xl shadow-lg p-4">
+          <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-sm font-semibold text-gray-600 mb-1">Priority Alerts</h2>
-              <p className="text-xs text-gray-500">Most urgent alerts requiring attention</p>
+              <p className="text-xs text-gray-500">Urgent alerts</p>
             </div>
-            <span className="bg-red-100 text-red-700 text-xs font-semibold px-3 py-1 rounded-full">
-              {insights?.activeAlerts || 0} Active
+            <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full">
+              {insights?.activeAlerts || 0}
             </span>
           </div>
 
-          <div className="space-y-4 mb-6">
+          <div className="space-y-3 mb-4">
             {loading ? (
               <p className="text-center text-gray-500 py-4">Loading alerts...</p>
             ) : priorityAlerts.length === 0 ? (
               <p className="text-center text-gray-500 py-4">No priority alerts at this time</p>
             ) : (
               priorityAlerts.map((alert) => (
-              <div key={alert.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="bg-white p-2 rounded-full shadow-sm">
-                    <alert.icon className="w-6 h-6 text-gray-900" />
+              <div key={alert.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="flex items-center gap-2">
+                  <div className="bg-white p-1 rounded-full shadow-sm">
+                    <alert.icon className="w-4 h-4 text-gray-900" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-800 text-sm">{alert.type}</h3>
+                    <h3 className="font-semibold text-gray-800 text-xs">{alert.type}</h3>
                     <p className="text-xs text-gray-600 flex items-center gap-1">
-                      <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                      <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
                       {alert.location}
                     </p>
                   </div>
                 </div>
-                <span className="bg-red-100 text-red-700 text-xs font-semibold px-3 py-1 rounded-full">
+                <span className="bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full">
                   {alert.severity}
                 </span>
               </div>
@@ -306,7 +410,7 @@ export default function EmergencyPage() {
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-1">Emergency contacts</h2>
-          <p className="text-sm text-gray-600">Nairobi County - Westlands | Quick access to local emergency services</p>
+          <p className="text-sm text-gray-600"> Quick access to local emergency services</p>
         </div>
 
         <div className="mb-4">
@@ -376,7 +480,7 @@ export default function EmergencyPage() {
                             <p className="text-sm text-gray-700 mb-2">{alert.description}</p>
                           )}
                           {alert.recommendation && (
-                            <p className="text-sm text-gray-800 bg-blue-50 p-2 rounded">
+                            <p className="text-sm text-gray-800 bg-gray-50 p-2 rounded">
                               <span className="font-semibold">Recommendation:</span> {alert.recommendation}
                             </p>
                           )}
@@ -385,7 +489,7 @@ export default function EmergencyPage() {
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                         alert.severity === 'Critical' ? 'bg-red-100 text-red-700' :
                         alert.severity === 'High' ? 'bg-red-100 text-red-700' :
-                        alert.severity === 'Medium' ? 'bg-blue-100 text-blue-700' :
+                        alert.severity === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-green-100 text-green-700'
                       }`}>
                         {alert.severity}
@@ -526,63 +630,71 @@ export default function EmergencyPage() {
 
       {/* Insights Modal */}
       {showInsightsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10">
               <h2 className="text-2xl font-bold text-gray-800">Detailed Insights</h2>
-              <button onClick={() => setShowInsightsModal(false)} className="text-gray-500 hover:text-gray-700">
+              <button 
+                onClick={() => setShowInsightsModal(false)} 
+                className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <div className="p-6 space-y-6">
-              <div className="bg-red-50 p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{insights?.title}</h3>
-                <p className="text-gray-700 mb-4">{insights?.description}</p>
-                <div className="bg-white p-4 rounded-lg">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">Recommendation:</p>
-                  <p className="text-gray-800">{insights?.recommendation}</p>
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="p-6 space-y-6">
+                <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-xl border border-red-100">
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">{insights?.title || 'Loading insights...'}</h3>
+                  <p className="text-gray-700 mb-4">{insights?.description || 'Fetching latest emergency insights for your area...'}</p>
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Recommendation:</p>
+                    <p className="text-gray-800">{insights?.recommendation || 'Stay alert and follow safety guidelines.'}</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-red-50 p-4 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Active Alerts</p>
-                  <p className="text-2xl font-bold text-gray-800">{insights?.activeAlerts || 0}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-100">
+                    <p className="text-xs text-gray-600 mb-1">Active Alerts</p>
+                    <p className="text-2xl font-bold text-red-700">{insights?.activeAlerts || 0}</p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+                    <p className="text-xs text-gray-600 mb-1">Affected Areas</p>
+                    <p className="text-xl font-bold text-green-700 break-words">{insights?.affectedAreas || 'N/A'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">Alert Trend</p>
+                    <p className="text-xl font-bold text-gray-800 break-words">{insights?.alertTrend || 'N/A'}</p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p className="text-xs text-gray-600 mb-1">County</p>
+                    <p className="text-lg font-bold text-gray-800 break-words">{insights?.county || 'N/A'}</p>
+                  </div>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Affected Areas</p>
-                  <p className="text-2xl font-bold text-gray-800">{insights?.affectedAreas || 'N/A'}</p>
-                </div>
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">Alert Trend</p>
-                  <p className="text-2xl font-bold text-gray-800">{insights?.alertTrend || 'N/A'}</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-xs text-gray-600 mb-1">County</p>
-                  <p className="text-lg font-bold text-gray-800">{insights?.county || 'N/A'}</p>
-                </div>
-              </div>
 
-              <div className="bg-gray-50 p-6 rounded-xl">
-                <h4 className="font-bold text-gray-800 mb-3">Safety Tips</h4>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">✓</span>
-                    <span>Stay informed through official channels and emergency alerts</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">✓</span>
-                    <span>Keep emergency contacts readily available</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">✓</span>
-                    <span>Follow evacuation orders and safety recommendations</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-600 mt-1">✓</span>
-                    <span>Prepare an emergency kit with essentials</span>
-                  </li>
-                </ul>
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                  <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-green-600" />
+                    Safety Tips
+                  </h4>
+                  <ul className="space-y-3 text-sm text-gray-700">
+                    <li className="flex items-start gap-3">
+                      <span className="text-green-600 mt-0.5 font-bold">✓</span>
+                      <span>Stay informed through official channels and emergency alerts</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-green-600 mt-0.5 font-bold">✓</span>
+                      <span>Keep emergency contacts readily available</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-green-600 mt-0.5 font-bold">✓</span>
+                      <span>Follow evacuation orders and safety recommendations</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-green-600 mt-0.5 font-bold">✓</span>
+                      <span>Prepare an emergency kit with essentials</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
