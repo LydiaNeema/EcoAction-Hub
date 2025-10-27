@@ -5,8 +5,10 @@ import Navbar from '@/components/Navbar';
 import { Search, MapPin, Clock, Leaf, X, Upload } from "lucide-react";
 import communityService from '@/services/communityService';
 import { getToken } from '@/utils/auth';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Page() {
+  const { refreshUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All categories");
   const [joinedActions, setJoinedActions] = useState(new Set());
@@ -143,7 +145,7 @@ export default function Page() {
   const handleJoinAction = async (actionId) => {
     const token = getToken();
     if (!token) {
-      alert('Please login to join actions. Go to Sign In page to login or register.');
+      alert('🔒 You need to be signed in to join community actions. Please sign in or create an account to start making an impact!');
       return;
     }
 
@@ -160,13 +162,14 @@ export default function Page() {
       setAllActions(prev => prev.map(updateAction));
       setCommunityActions(prev => prev.map(updateAction));
       
-      // Refresh stats
+      // Refresh stats and user profile
       fetchStats();
       fetchMyActions();
+      refreshUser(); // This will update the dashboard statistics
       
       // Show success message
       const action = communityActions.find(a => a.id === actionId);
-      alert(`✅ Successfully joined "${action?.title}"! You are now a participant.`);
+      alert(`✅ Great! You've successfully joined "${action?.title}". You'll receive updates about this action and your impact has been recorded.`);
     } catch (err) {
       alert(err.message || 'Failed to join action. Please try again.');
     }
@@ -190,12 +193,13 @@ export default function Page() {
       setAllActions(prev => prev.map(updateAction));
       setCommunityActions(prev => prev.map(updateAction));
       
-      // Refresh stats
+      // Refresh stats and user profile
       fetchStats();
       fetchMyActions();
+      refreshUser(); // This will update the dashboard statistics
       
       const action = communityActions.find(a => a.id === actionId);
-      alert(`You have left "${action?.title}". You can rejoin anytime!`);
+      alert(`You have successfully left "${action?.title}". Your participation has been removed, but you can rejoin anytime if you change your mind.`);
     } catch (err) {
       alert(err.message || 'Failed to leave action. Please try again.');
     }
@@ -209,10 +213,11 @@ export default function Page() {
     try {
       await communityService.createAction(formData);
       setShowCreateModal(false);
-      // Refresh the actions list
+      // Refresh the actions list and user profile
       fetchActions();
       fetchStats();
-      alert('Action created successfully!');
+      refreshUser(); // This will update the dashboard statistics
+      alert('🎉 Your community action has been created successfully! Other community members can now discover and join your initiative.');
     } catch (err) {
       alert(err.message || 'Failed to create action. Please make sure you are logged in.');
     }
@@ -443,6 +448,43 @@ function CreateActionModal({ onClose, onCreate }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    const requiredFields = [
+      { field: 'title', name: 'Action Title' },
+      { field: 'description', name: 'Description' },
+      { field: 'category', name: 'Category' },
+      { field: 'location', name: 'Location' },
+      { field: 'date', name: 'Date & Time' }
+    ];
+    
+    for (const { field, name } of requiredFields) {
+      if (!formData[field] || formData[field].trim() === '') {
+        alert(`Please fill in the ${name} field. All required fields must be completed.`);
+        return;
+      }
+    }
+    
+    // Validate date is in the future
+    const selectedDate = new Date(formData.date);
+    const now = new Date();
+    if (selectedDate <= now) {
+      alert('Please select a future date and time for your action.');
+      return;
+    }
+    
+    // Validate title length
+    if (formData.title.trim().length < 3) {
+      alert('Action title must be at least 3 characters long.');
+      return;
+    }
+    
+    // Validate description length
+    if (formData.description.trim().length < 10) {
+      alert('Description must be at least 10 characters long to provide enough detail.');
+      return;
+    }
+    
     setSubmitting(true);
     try {
       await onCreate(formData);
