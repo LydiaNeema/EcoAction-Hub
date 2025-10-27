@@ -108,6 +108,14 @@ def create_action():
             created_by=current_user_id
         )
         
+        # Update user profile statistics for creating an action
+        from app.models.profile import Profile
+        profile = Profile.query.filter_by(user_id=current_user_id).first()
+        if profile:
+            profile.community_impact += 2  # More points for creating actions
+            profile.impact_this_month += 2
+            profile.impact_points += 20  # Award more points for creating actions
+        
         db.session.add(action)
         db.session.commit()
         
@@ -253,7 +261,7 @@ def join_action(action_id):
         if existing:
             return jsonify({
                 'success': False,
-                'error': 'Already joined this action'
+                'error': 'You have already joined this action. Check your joined actions to see your current participations.'
             }), 400
         
         # Create participant
@@ -264,6 +272,16 @@ def join_action(action_id):
         
         # Update participants count
         action.participants_count += 1
+        
+        # Update user profile statistics
+        from app.models.profile import Profile
+        profile = Profile.query.filter_by(user_id=current_user_id).first()
+        if profile:
+            profile.alerts_responded += 1
+            profile.alerts_this_month += 1
+            profile.community_impact += 1
+            profile.impact_this_month += 1
+            profile.impact_points += 10  # Award points for joining actions
         
         db.session.add(participant)
         db.session.commit()
@@ -306,12 +324,27 @@ def leave_action(action_id):
         if not participant:
             return jsonify({
                 'success': False,
-                'error': 'Not a participant of this action'
+                'error': 'You are not currently participating in this action. You can only leave actions you have joined.'
             }), 400
         
         # Update participants count
         if action.participants_count > 0:
             action.participants_count -= 1
+        
+        # Update user profile statistics
+        from app.models.profile import Profile
+        profile = Profile.query.filter_by(user_id=current_user_id).first()
+        if profile:
+            if profile.alerts_responded > 0:
+                profile.alerts_responded -= 1
+            if profile.alerts_this_month > 0:
+                profile.alerts_this_month -= 1
+            if profile.community_impact > 0:
+                profile.community_impact -= 1
+            if profile.impact_this_month > 0:
+                profile.impact_this_month -= 1
+            if profile.impact_points >= 10:
+                profile.impact_points -= 10
         
         db.session.delete(participant)
         db.session.commit()
