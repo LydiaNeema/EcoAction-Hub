@@ -300,7 +300,7 @@ export default function EmergencyPage() {
                     'Analyzing current environmental conditions in your area...'
                   }
                 </p>
-                <div className="bg-white rounded-lg p-3 border-l-4 border-black-400  border-black">
+                <div className="bg-white rounded-lg p-3 border-l-4 border-green-400 border border-black">
                   <p className="text-sm text-gray-800">
                     <span className="font-semibold"> Recommendation:</span> {
                       insights?.recommendation ? 
