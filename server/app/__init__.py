@@ -96,6 +96,14 @@ def create_app():
     except Exception as e:
         print(f"✗ Contact blueprint registration failed: {e}")
     
+    # Register admin routes (for manual migration)
+    try:
+        from app.routes import admin
+        app.register_blueprint(admin.bp)
+        print("✓ Admin blueprint registered successfully")
+    except Exception as e:
+        print(f"✗ Admin blueprint registration failed: {e}")
+    
     # ------------------- Default route -------------------
     @app.route("/")
     def home():
