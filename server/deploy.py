@@ -11,12 +11,25 @@ from flask_migrate import upgrade
 
 def deploy():
     """Run deployment tasks."""
-    from app import create_app
-    from app.extensions import db
+    print("🚀 Starting deployment script...")
     
-    app = create_app()
+    try:
+        from app import create_app
+        from app.extensions import db
+        print("✓ Successfully imported app modules")
+    except Exception as e:
+        print(f"✗ Failed to import app modules: {e}")
+        return False
+    
+    try:
+        app = create_app()
+        print("✓ Successfully created Flask app")
+    except Exception as e:
+        print(f"✗ Failed to create Flask app: {e}")
+        return False
     
     with app.app_context():
+        print("✓ Entered Flask app context")
         # Run database migrations
         print("Running database migrations...")
         try:

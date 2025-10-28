@@ -1,2 +1,2 @@
 web: gunicorn --bind 0.0.0.0:$PORT run:app
-release: python deploy.py
+release: flask db upgrade && python -c "from app import create_app; from app.models.emergency import EmergencyContact; app = create_app(); app.app_context().push(); print('Checking emergency contacts...'); count = EmergencyContact.query.count(); print(f'Found {count} contacts'); exec(open('seed_emergency_contacts.py').read()) if count == 0 else print('Contacts already exist')"

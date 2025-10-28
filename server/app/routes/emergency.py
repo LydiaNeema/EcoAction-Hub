@@ -272,36 +272,80 @@ def get_contacts():
             'error': str(e)
         }), 500
 
+# Seed emergency contacts
+@bp.route('/seed-contacts', methods=['POST'])
+def seed_contacts():
+    """Seed emergency contacts if they don't exist."""
+    try:
+        # Check if contacts already exist
+        existing_count = EmergencyContact.query.count()
+        
+        if existing_count > 0:
+            return jsonify({
+                'success': True,
+                'message': f'Emergency contacts already exist ({existing_count} contacts)',
+                'seeded': False
+            }), 200
+        
+        # Import and run seeding function
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        
+        from seed_emergency_contacts import seed_emergency_contacts
+        seed_emergency_contacts()
+        
+        new_count = EmergencyContact.query.count()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Successfully seeded {new_count} emergency contacts',
+            'seeded': True
+        }), 201
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Failed to seed contacts: {str(e)}'
+        }), 500
+
 # Create emergency report
 @bp.route('/reports', methods=['POST'])
 def create_report():
     try:
         data = request.get_json()
         
-        # Validate data
-        validated_data = emergency_report_schema.load(data)
+        # Create new emergency report
+        report = EmergencyReport(
+            type=data.get('type'),
+            location=data.get('location'),
+            description=data.get('description'),
+            severity=data.get('severity', 'Medium'),
+            status='active'
+        )
         
-        # Create new report
-        report = EmergencyReport(**validated_data)
         db.session.add(report)
         db.session.commit()
         
         return jsonify({
             'success': True,
-            'message': 'Emergency report submitted successfully',
-            'data': emergency_report_schema.dump(report)
+            'message': 'Emergency report created successfully',
+            'report': {
+                'id': report.id,
+                'type': report.type,
+                'location': report.location,
+                'description': report.description,
+                'severity': report.severity,
+                'status': report.status,
+                'created_at': report.created_at.isoformat()
+            }
         }), 201
-    except ValidationError as e:
-        return jsonify({
-            'success': False,
-            'error': 'Validation error',
-            'details': e.messages
-        }), 400
+        
     except Exception as e:
         db.session.rollback()
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': f'Failed to create report: {str(e)}'
         }), 500
 
 # Get all emergency reports
