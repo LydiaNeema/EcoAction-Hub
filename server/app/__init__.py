@@ -25,17 +25,20 @@ def create_app():
     # Configure CORS to allow frontend access
     allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
     
-    # Add production frontend URL if in production
-    if os.getenv('FLASK_ENV') == 'production':
-        frontend_url = os.getenv('FRONTEND_URL')
-        if frontend_url:
-            allowed_origins.append(frontend_url)
+    # Always add production frontend URL (not just in production)
+    frontend_url = os.getenv('FRONTEND_URL')
+    if frontend_url:
+        allowed_origins.append(frontend_url)
+        print(f"✓ Added frontend URL to CORS: {frontend_url}")
+    
+    print(f"✓ CORS allowed origins: {allowed_origins}")
     
     CORS(app, resources={
         r"/api/*": {
             "origins": allowed_origins,
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"]
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
         }
     })
 
