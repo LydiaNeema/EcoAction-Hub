@@ -263,33 +263,7 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Features */}
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-4">Features</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/community" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Community Actions
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/emergency" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Emergency Alerts
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/ai" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    AI Assistant
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
+            
             {/* Resources */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-4">Resources</h3>

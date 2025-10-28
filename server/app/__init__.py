@@ -1,16 +1,19 @@
+import os
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
 from .extensions import db, migrate, api, bcrypt
-from .config import DevelopmentConfig
+from .config import DevelopmentConfig, ProductionConfig
 
 
 def create_app():
     app = Flask(__name__)
 
     # ------------------- Config -------------------
-    app.config.from_object(DevelopmentConfig)
+    # Use production config if FLASK_ENV is production, otherwise development
+    config_class = ProductionConfig if os.getenv('FLASK_ENV') == 'production' else DevelopmentConfig
+    app.config.from_object(config_class)
 
     # ------------------- Extensions -------------------
     db.init_app(app)
@@ -20,9 +23,17 @@ def create_app():
     bcrypt.init_app(app)
     
     # Configure CORS to allow frontend access
+    allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    
+    # Add production frontend URL if in production
+    if os.getenv('FLASK_ENV') == 'production':
+        frontend_url = os.getenv('FRONTEND_URL')
+        if frontend_url:
+            allowed_origins.append(frontend_url)
+    
     CORS(app, resources={
         r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "origins": allowed_origins,
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
