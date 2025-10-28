@@ -30,6 +30,7 @@
 Set the following environment variables in Render dashboard:
 
 **Required:**
+- `FLASK_APP`: `run.py`
 - `FLASK_ENV`: `production`
 - `FLASK_DEBUG`: `false`
 - `SECRET_KEY`: Generate a secure random string

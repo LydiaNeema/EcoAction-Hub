@@ -7,6 +7,7 @@ from app.schemas.auth import register_schema, login_schema, user_schema
 from marshmallow import ValidationError
 import secrets
 import hashlib
+import os
 from datetime import datetime, timedelta
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -142,8 +143,9 @@ def forgot_password():
             
             # In a real application, you would send an email here
             # For now, we'll just log the token (remove this in production)
+            frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:3000')
             print(f"Password reset token for {email}: {token}")
-            print(f"Reset URL: http://localhost:3000/auth/forgot-password?token={token}")
+            print(f"Reset URL: {frontend_url}/auth/forgot-password?token={token}")
         
         return jsonify({
             'success': True,
