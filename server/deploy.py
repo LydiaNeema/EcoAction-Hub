@@ -26,27 +26,38 @@ def deploy():
             print(f"✗ Migration failed: {e}")
             return False
         
-        # Check if we should seed data (only for first deployment)
-        seed_data = os.getenv('SEED_DATA', 'false').lower() == 'true'
-        
-        if seed_data:
-            print("Seeding initial data...")
-            try:
+        # Check if emergency contacts exist, if not, seed them automatically
+        try:
+            from app.models.emergency import EmergencyContact
+            contact_count = EmergencyContact.query.count()
+            
+            if contact_count == 0:
+                print("No emergency contacts found. Seeding initial data...")
                 # Import seeding functions
                 from seed_emergency_contacts import seed_emergency_contacts
-                from seed_community import seed_community_actions
                 
                 # Seed emergency contacts
                 seed_emergency_contacts()
-                print("✓ Emergency contacts seeded")
+                print("✓ Emergency contacts seeded automatically")
+            else:
+                print(f"✓ Found {contact_count} emergency contacts in database")
                 
-                # Seed community actions
+        except Exception as e:
+            print(f"⚠ Could not check/seed emergency contacts: {e}")
+            # Don't fail deployment if seeding fails
+        
+        # Check if we should seed additional data
+        seed_data = os.getenv('SEED_DATA', 'false').lower() == 'true'
+        
+        if seed_data:
+            print("Seeding additional community data...")
+            try:
+                from seed_community import seed_community_actions
                 seed_community_actions()
                 print("✓ Community actions seeded")
                 
             except Exception as e:
-                print(f"⚠ Seeding failed (this is optional): {e}")
-                # Don't fail deployment if seeding fails
+                print(f"⚠ Community seeding failed (this is optional): {e}")
         
         print("🎉 Deployment completed successfully!")
         return True
