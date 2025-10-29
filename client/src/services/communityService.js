@@ -131,9 +131,9 @@ const communityService = {
   },
 
   /**
-   * Join a community action
+   * Join a community action with optional image and notes
    */
-  async joinAction(actionId) {
+  async joinAction(actionId, participationData = {}) {
     const token = getToken();
     
     if (!token) {
@@ -143,8 +143,10 @@ const communityService = {
     const response = await fetch(`${endpoints.community}/actions/${actionId}/join`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      }
+      },
+      body: JSON.stringify(participationData)
     });
 
     if (!response.ok) {

@@ -36,6 +36,8 @@ class ActionParticipant(db.Model, SerializerMixin):
     action_id = db.Column(db.Integer, db.ForeignKey('community_actions.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    participation_image = db.Column(db.String(500), nullable=True)  # Image uploaded when joining
+    notes = db.Column(db.Text, nullable=True)  # Optional notes when joining
 
     # Relationships
     action = db.relationship('CommunityAction', back_populates='participants')

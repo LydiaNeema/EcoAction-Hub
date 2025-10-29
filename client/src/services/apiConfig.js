@@ -13,6 +13,7 @@ export const endpoints = {
   reports: `${API_BASE}/reports`,
   users: `${API_BASE}/users`,
   contact: `${API_BASE}/contact`,
+  upload: `${API_BASE}/upload`,
 };
 
 export default API_BASE;

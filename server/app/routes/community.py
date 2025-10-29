@@ -240,7 +240,7 @@ def delete_action(action_id):
 @bp.route('/actions/<int:action_id>/join', methods=['POST'])
 @jwt_required()
 def join_action(action_id):
-    """Join a community action"""
+    """Join a community action with optional image and notes"""
     try:
         current_user_id = get_jwt_identity()
         
@@ -264,10 +264,17 @@ def join_action(action_id):
                 'error': 'You have already joined this action. Check your joined actions to see your current participations.'
             }), 400
         
+        # Get optional data from request
+        data = request.get_json() or {}
+        participation_image = data.get('participation_image')
+        notes = data.get('notes')
+        
         # Create participant
         participant = ActionParticipant(
             action_id=action_id,
-            user_id=current_user_id
+            user_id=current_user_id,
+            participation_image=participation_image,
+            notes=notes
         )
         
         # Update participants count
