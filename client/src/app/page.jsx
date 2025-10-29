@@ -2,9 +2,28 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { AlertTriangle, Bell, Zap } from 'lucide-react';
+import { AlertTriangle, Bell, Zap, ChevronUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#F6FFF8]">
       {/* Navigation - Sticky */}
@@ -240,72 +259,21 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-50 border-t border-gray-200 py-12">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            {/* About */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {/* Vision */}
             <div>
-              <h3 className="font-semibold text-gray-900 mb-4">About</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/about" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/mission" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Our Mission
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/team" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Team
-                  </Link>
-                </li>
-              </ul>
+              <h3 className="font-semibold text-gray-900 mb-4">Our Vision</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Creating sustainable communities where every action counts towards environmental preservation and collective well-being.
+              </p>
             </div>
 
-            
-            {/* Resources */}
+            {/* Mission */}
             <div>
-              <h3 className="font-semibold text-gray-900 mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/help" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/guides" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Guides
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/privacy" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cookies" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                    Cookie Policy
-                  </Link>
-                </li>
-              </ul>
+              <h3 className="font-semibold text-gray-900 mb-4">Our Mission</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Empowering individuals and communities with tools, resources, and connections to drive meaningful environmental action and emergency response.
+              </p>
             </div>
           </div>
 
@@ -317,6 +285,17 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-6 right-6 bg-[#16A34A] text-white p-3 rounded-full shadow-lg hover:bg-[#15803D] transition-all duration-300 z-50 hover:scale-110"
+          aria-label="Scroll to top"
+        >
+          <ChevronUp size={24} />
+        </button>
+      )}
     </div>
   );
 }
