@@ -16,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${jost.variable} antialiased`} suppressHydrationWarning={true}>
+      <body className={`${jost.variable} antialiased`}>
         <AuthProvider>
           {children}
         </AuthProvider>
