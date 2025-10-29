@@ -1,6 +1,5 @@
 import { getToken } from '@/utils/auth';
-
-const API_BASE_URL = '/api/upload';
+import { endpoints } from './apiConfig';
 
 class UploadService {
   /**
@@ -37,7 +36,7 @@ class UploadService {
       formData.append('file', file);
 
       // Upload file
-      const response = await fetch(`${API_BASE_URL}/image`, {
+      const response = await fetch(`${endpoints.upload}/image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -70,7 +69,7 @@ class UploadService {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${API_BASE_URL}/image/${filename}`, {
+      const response = await fetch(`${endpoints.upload}/image/${filename}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
