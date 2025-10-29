@@ -69,8 +69,9 @@ def reset_action_ids():
         
         # Reset the sequence for fresh IDs
         with db.engine.connect() as conn:
-            conn.execute("ALTER SEQUENCE community_actions_id_seq RESTART WITH 1")
-            conn.execute("ALTER SEQUENCE action_participants_id_seq RESTART WITH 1")
+            from sqlalchemy import text
+            conn.execute(text("ALTER SEQUENCE community_actions_id_seq RESTART WITH 1"))
+            conn.execute(text("ALTER SEQUENCE action_participants_id_seq RESTART WITH 1"))
             conn.commit()
         
         return jsonify({

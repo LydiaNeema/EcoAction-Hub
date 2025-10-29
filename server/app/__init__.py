@@ -66,23 +66,23 @@ def create_app():
                 column_names = [col['name'] for col in columns]
                 
                 if 'participation_image' not in column_names or 'notes' not in column_names:
-                    print("🔧 Adding missing participation fields...")
+                    print("Adding missing participation fields...")
                     
                     with db.engine.connect() as conn:
                         if 'participation_image' not in column_names:
                             conn.execute("ALTER TABLE action_participants ADD COLUMN participation_image VARCHAR(500)")
-                            print("✅ Added participation_image column")
+                            print("Added participation_image column")
                         
                         if 'notes' not in column_names:
                             conn.execute("ALTER TABLE action_participants ADD COLUMN notes TEXT")
-                            print("✅ Added notes column")
+                            print("Added notes column")
                         
                         conn.commit()
-                    print("🎉 Participation fields migration completed!")
+                    print("Participation fields migration completed!")
                 else:
-                    print("✅ Participation fields already exist")
+                    print("Participation fields already exist")
         except Exception as e:
-            print(f"⚠️ Migration error (safe to ignore): {e}")
+            print(f"Migration error (safe to ignore): {e}")
     
     # Run auto migration if environment variable is set
     if os.getenv('AUTO_MIGRATE', 'false').lower() == 'true':

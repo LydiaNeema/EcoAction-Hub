@@ -132,7 +132,7 @@ def seed_emergency_contacts():
         db.session.add(contact)
     
     db.session.commit()
-    print(f"✅ Successfully seeded {len(contacts_data)} emergency contacts")
+    print(f"Successfully seeded {len(contacts_data)} emergency contacts")
 
 def main():
     """Main function to run the seeding."""
@@ -141,9 +141,9 @@ def main():
     with app.app_context():
         try:
             seed_emergency_contacts()
-            print("🎉 Emergency contacts seeding completed successfully!")
+            print("Emergency contacts seeding completed successfully!")
         except Exception as e:
-            print(f"❌ Error seeding emergency contacts: {e}")
+            print(f"Error seeding emergency contacts: {e}")
             db.session.rollback()
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-print("🚀 Starting migration script...")
+print("Starting migration script...")
 
 try:
     from app import create_app
@@ -41,8 +41,8 @@ try:
         except Exception as e:
             print(f"⚠ Could not check emergency contacts: {e}")
         
-        print("🎉 Migration script completed successfully!")
+        print("Migration script completed successfully!")
         
 except Exception as e:
-    print(f"❌ Migration failed: {e}")
+    print(f"Migration failed: {e}")
     sys.exit(1)

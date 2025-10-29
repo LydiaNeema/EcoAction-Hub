@@ -16,12 +16,12 @@ export default function TestAPIPage() {
             
             if (response.ok) {
                 const data = await response.json();
-                setResult(`✅ Basic API Success!\n${JSON.stringify(data, null, 2)}`);
+                setResult(`Basic API Success!\n${JSON.stringify(data, null, 2)}`);
             } else {
-                setResult(`❌ Basic API Error: ${response.status} ${response.statusText}`);
+                setResult(`Basic API Error: ${response.status} ${response.statusText}`);
             }
         } catch (error) {
-            setResult(`❌ Basic API Network Error: ${error.message}`);
+            setResult(`Basic API Network Error: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -59,13 +59,13 @@ export default function TestAPIPage() {
             console.log('Response data:', data);
             
             if (response.ok) {
-                setResult(`✅ Auth API Success!\n${JSON.stringify(data, null, 2)}`);
+                setResult(`Auth API Success!\n${JSON.stringify(data, null, 2)}`);
             } else {
-                setResult(`❌ Auth API Error: ${response.status}\n${JSON.stringify(data, null, 2)}`);
+                setResult(`Auth API Error: ${response.status}\n${JSON.stringify(data, null, 2)}`);
             }
         } catch (error) {
             console.error('Auth API Error:', error);
-            setResult(`❌ Auth API Network Error: ${error.message}`);
+            setResult(`Auth API Network Error: ${error.message}`);
         } finally {
             setLoading(false);
         }

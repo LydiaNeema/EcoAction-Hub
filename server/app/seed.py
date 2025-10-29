@@ -117,7 +117,7 @@ def seed_emergency_data():
         db.session.add_all(contacts)
         db.session.commit()
         
-        print('✅ Emergency data seeded successfully!')
+        print('Emergency data seeded successfully!')
         print(f'   - {len(alerts)} alerts created')
         print(f'   - {len(contacts)} emergency contacts created')
 

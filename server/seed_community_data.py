@@ -130,7 +130,7 @@ with app.app_context():
     
     db.session.commit()
     
-    print(f"✅ Successfully seeded {len(actions)} community actions!")
+    print(f"Successfully seeded {len(actions)} community actions!")
     print("\nActions created:")
     for action in actions:
         print(f"  - {action.title} ({action.category})")

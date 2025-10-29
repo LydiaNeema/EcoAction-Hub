@@ -91,10 +91,10 @@ def main():
         return
     
     if not test_app_creation():
-        print("\n❌ App creation tests failed. Check database and models.")
+        print("\nApp creation tests failed. Check database and models.")
         return
     
-    print("\n✅ All tests passed! Auth setup looks good.")
+    print("\nAll tests passed! Auth setup looks good.")
     print("If you're still getting 500 errors, the issue might be in the request data or validation.")
 
 if __name__ == "__main__":

@@ -169,7 +169,7 @@ export default function Page() {
       
       // Show success message
       const action = communityActions.find(a => a.id === actionId);
-      alert(`✅ Great! You've successfully joined "${action?.title}". You'll receive updates about this action and your impact has been recorded.`);
+      alert(`Great! You've successfully joined "${action?.title}". You'll receive updates about this action and your impact has been recorded.`);
     } catch (err) {
       alert(err.message || 'Failed to join action. Please try again.');
     }
@@ -217,7 +217,7 @@ export default function Page() {
       fetchActions();
       fetchStats();
       refreshUser(); // This will update the dashboard statistics
-      alert('🎉 Your community action has been created successfully! Other community members can now discover and join your initiative.');
+      alert('Your community action has been created successfully! Other community members can now discover and join your initiative.');
     } catch (err) {
       alert(err.message || 'Failed to create action. Please make sure you are logged in.');
     }

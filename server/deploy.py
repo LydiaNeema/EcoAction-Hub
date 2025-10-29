@@ -11,7 +11,7 @@ from flask_migrate import upgrade
 
 def deploy():
     """Run deployment tasks."""
-    print("🚀 Starting deployment script...")
+    print("Starting deployment script...")
     
     try:
         from app import create_app
@@ -72,7 +72,7 @@ def deploy():
             except Exception as e:
                 print(f"⚠ Community seeding failed (this is optional): {e}")
         
-        print("🎉 Deployment completed successfully!")
+        print("Deployment completed successfully!")
         return True
 
 if __name__ == '__main__':
