@@ -96,12 +96,16 @@ class UploadService {
    * @returns {string} Full image URL
    */
   getImageUrl(imagePath) {
+    console.log('🖼️ getImageUrl called with:', imagePath);
+    
     if (!imagePath) {
+      console.log('🖼️ No image path, using default fallback');
       return '/CommunityTreeplanting.jpeg'; // Default fallback
     }
 
     // If it's already a full URL, return as is
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      console.log('🖼️ Full URL detected, returning as-is:', imagePath);
       return imagePath;
     }
 
@@ -112,14 +116,22 @@ class UploadService {
       // Use centralized API base but direct uploads path
       const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api';
       const baseUrl = apiBase.replace('/api', ''); // Remove /api suffix
-      return `${baseUrl}/uploads/${filename}`;
+      const finalUrl = `${baseUrl}/uploads/${filename}`;
+      console.log('🖼️ Uploaded image URL generated:', finalUrl);
+      console.log('🖼️ API Base:', apiBase);
+      console.log('🖼️ Base URL:', baseUrl);
+      console.log('🖼️ Filename:', filename);
+      return finalUrl;
     }
 
     // In development, use local paths
     if (!imagePath.startsWith('/')) {
-      return `/${imagePath}`;
+      const localPath = `/${imagePath}`;
+      console.log('🖼️ Local path generated:', localPath);
+      return localPath;
     }
 
+    console.log('🖼️ Returning path as-is:', imagePath);
     return imagePath;
   }
 

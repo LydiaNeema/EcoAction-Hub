@@ -132,8 +132,8 @@ def create_app():
             if not filename or '..' in filename:
                 return jsonify({'error': 'Invalid filename'}), 400
             
-            # Construct upload directory path
-            upload_dir = os.path.join(app.root_path, '..', '..', 'client', 'public', 'uploads')
+            # Construct upload directory path (backend-specific)
+            upload_dir = os.path.join(app.root_path, '..', 'uploads')
             
             # Check if file exists
             file_path = os.path.join(upload_dir, secure_filename(filename))

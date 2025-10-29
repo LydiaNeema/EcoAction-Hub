@@ -80,8 +80,8 @@ def upload_image():
         file_extension = secure_filename(file.filename).rsplit('.', 1)[1].lower()
         unique_filename = f"{uuid.uuid4().hex}.{file_extension}"
         
-        # Create uploads directory if it doesn't exist
-        upload_dir = os.path.join(current_app.root_path, '..', '..', 'client', 'public', 'uploads')
+        # Create uploads directory if it doesn't exist (backend-specific)
+        upload_dir = os.path.join(current_app.root_path, '..', 'uploads')
         os.makedirs(upload_dir, exist_ok=True)
         
         # Read and compress image
@@ -121,8 +121,8 @@ def delete_image(filename):
                 'error': 'Invalid filename'
             }), 400
         
-        # Construct file path
-        upload_dir = os.path.join(current_app.root_path, '..', '..', 'client', 'public', 'uploads')
+        # Construct file path (backend-specific)
+        upload_dir = os.path.join(current_app.root_path, '..', 'uploads')
         file_path = os.path.join(upload_dir, secure_filename(filename))
         
         # Check if file exists and delete
@@ -155,8 +155,8 @@ def serve_image(filename):
                 'error': 'Invalid filename'
             }), 400
         
-        # Construct upload directory path
-        upload_dir = os.path.join(current_app.root_path, '..', '..', 'client', 'public', 'uploads')
+        # Construct upload directory path (backend-specific)
+        upload_dir = os.path.join(current_app.root_path, '..', 'uploads')
         
         # Check if file exists
         file_path = os.path.join(upload_dir, secure_filename(filename))
@@ -172,4 +172,32 @@ def serve_image(filename):
         return jsonify({
             'success': False,
             'error': f'Serve failed: {str(e)}'
+        }), 500
+
+@bp.route('/debug/uploads')
+def debug_uploads():
+    """Debug endpoint to check uploads directory"""
+    try:
+        upload_dir = os.path.join(current_app.root_path, '..', 'uploads')
+        
+        # Check if directory exists
+        exists = os.path.exists(upload_dir)
+        
+        # List files if directory exists
+        files = []
+        if exists:
+            files = [f for f in os.listdir(upload_dir) if os.path.isfile(os.path.join(upload_dir, f))]
+        
+        return jsonify({
+            'success': True,
+            'upload_dir': upload_dir,
+            'directory_exists': exists,
+            'files': files,
+            'file_count': len(files)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Debug failed: {str(e)}'
         }), 500
