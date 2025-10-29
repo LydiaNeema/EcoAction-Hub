@@ -23,13 +23,17 @@ def create_app():
     bcrypt.init_app(app)
     
     # Configure CORS to allow frontend access
-    allowed_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    allowed_origins = [
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "https://eco-action-hub-puce.vercel.app"  # Production Vercel frontend
+    ]
     
-    # Always add production frontend URL (not just in production)
+    # Add custom frontend URL from environment if provided
     frontend_url = os.getenv('FRONTEND_URL')
-    if frontend_url:
+    if frontend_url and frontend_url not in allowed_origins:
         allowed_origins.append(frontend_url)
-        print(f"✓ Added frontend URL to CORS: {frontend_url}")
+        print(f"✓ Added custom frontend URL to CORS: {frontend_url}")
     
     print(f"✓ CORS allowed origins: {allowed_origins}")
     

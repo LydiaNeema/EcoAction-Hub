@@ -38,8 +38,8 @@ Set the following environment variables in Render dashboard:
 - `DATABASE_URL`: Use the PostgreSQL connection string from step 1
 
 **Optional:**
-- `OPENAI_API_KEY`: Your OpenAI API key for AI features
-- `FRONTEND_URL`: Your frontend URL for CORS (e.g., `https://your-frontend.onrender.com`)
+- `HUGGINGFACE_API_KEY`: Your Hugging Face API key for AI features (replaces OPENAI_API_KEY)
+- `FRONTEND_URL`: Your frontend URL for CORS (e.g., `https://eco-action-hub-puce.vercel.app`)
 - `SEED_DATA`: `true` (only for first deployment to seed initial data)
 
 #### 4. Deploy
