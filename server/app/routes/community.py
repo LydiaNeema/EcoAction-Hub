@@ -148,11 +148,7 @@ def update_action(action_id):
             }), 404
         
         # Check if user is the creator (optional - can be removed for admin access)
-        # Convert both to int for comparison since JWT identity might be string
-        print(f"DEBUG: Edit action - current_user_id: {current_user_id} (type: {type(current_user_id)})")
-        print(f"DEBUG: Edit action - action.created_by: {action.created_by} (type: {type(action.created_by)})")
-        
-        if int(action.created_by) != int(current_user_id):
+        if action.created_by != current_user_id:
             return jsonify({
                 'success': False,
                 'error': 'Unauthorized to update this action'
@@ -219,8 +215,7 @@ def delete_action(action_id):
             }), 404
         
         # Check if user is the creator
-        # Convert both to int for comparison since JWT identity might be string
-        if int(action.created_by) != int(current_user_id):
+        if action.created_by != current_user_id:
             return jsonify({
                 'success': False,
                 'error': 'Unauthorized to delete this action'
