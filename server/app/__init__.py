@@ -119,6 +119,32 @@ def create_app():
     except Exception as e:
         print(f"✗ Upload blueprint registration failed: {e}")
     
+    # ------------------- Static file serving -------------------
+    @app.route('/uploads/<filename>')
+    def serve_uploaded_file(filename):
+        """Serve uploaded images"""
+        from flask import send_from_directory
+        from werkzeug.utils import secure_filename
+        import os
+        
+        try:
+            # Validate filename
+            if not filename or '..' in filename:
+                return jsonify({'error': 'Invalid filename'}), 400
+            
+            # Construct upload directory path
+            upload_dir = os.path.join(app.root_path, '..', '..', 'client', 'public', 'uploads')
+            
+            # Check if file exists
+            file_path = os.path.join(upload_dir, secure_filename(filename))
+            if not os.path.exists(file_path):
+                return jsonify({'error': 'File not found'}), 404
+            
+            return send_from_directory(upload_dir, secure_filename(filename))
+            
+        except Exception as e:
+            return jsonify({'error': f'Serve failed: {str(e)}'}), 500
+
     # ------------------- Default route -------------------
     @app.route("/")
     def home():

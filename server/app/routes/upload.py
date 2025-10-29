@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from flask_jwt_extended import jwt_required
 import os
 import uuid
@@ -142,4 +142,34 @@ def delete_image(filename):
         return jsonify({
             'success': False,
             'error': f'Delete failed: {str(e)}'
+        }), 500
+
+@bp.route('/serve/<filename>')
+def serve_image(filename):
+    """Serve uploaded images"""
+    try:
+        # Validate filename
+        if not filename or '..' in filename:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid filename'
+            }), 400
+        
+        # Construct upload directory path
+        upload_dir = os.path.join(current_app.root_path, '..', '..', 'client', 'public', 'uploads')
+        
+        # Check if file exists
+        file_path = os.path.join(upload_dir, secure_filename(filename))
+        if not os.path.exists(file_path):
+            return jsonify({
+                'success': False,
+                'error': 'File not found'
+            }), 404
+        
+        return send_from_directory(upload_dir, secure_filename(filename))
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Serve failed: {str(e)}'
         }), 500

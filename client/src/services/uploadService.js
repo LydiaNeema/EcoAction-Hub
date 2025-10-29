@@ -105,7 +105,17 @@ class UploadService {
       return imagePath;
     }
 
-    // If it's a relative path, ensure it starts with /
+    // For uploaded images, use the backend server
+    if (imagePath.startsWith('/uploads/') || imagePath.startsWith('uploads/')) {
+      // Extract filename from path
+      const filename = imagePath.includes('/') ? imagePath.split('/').pop() : imagePath;
+      // Use centralized API base but direct uploads path
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api';
+      const baseUrl = apiBase.replace('/api', ''); // Remove /api suffix
+      return `${baseUrl}/uploads/${filename}`;
+    }
+
+    // In development, use local paths
     if (!imagePath.startsWith('/')) {
       return `/${imagePath}`;
     }
