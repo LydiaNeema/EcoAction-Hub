@@ -55,6 +55,39 @@ def create_app():
     from app.models.community import CommunityAction, ActionParticipant
     from app.models.contact import ContactMessage
     
+    # ------------------- Auto Migration (Temporary) -------------------
+    def add_missing_columns():
+        """Add missing columns to existing tables"""
+        try:
+            with app.app_context():
+                # Check if participation fields need to be added
+                inspector = db.inspect(db.engine)
+                columns = inspector.get_columns('action_participants')
+                column_names = [col['name'] for col in columns]
+                
+                if 'participation_image' not in column_names or 'notes' not in column_names:
+                    print("🔧 Adding missing participation fields...")
+                    
+                    with db.engine.connect() as conn:
+                        if 'participation_image' not in column_names:
+                            conn.execute("ALTER TABLE action_participants ADD COLUMN participation_image VARCHAR(500)")
+                            print("✅ Added participation_image column")
+                        
+                        if 'notes' not in column_names:
+                            conn.execute("ALTER TABLE action_participants ADD COLUMN notes TEXT")
+                            print("✅ Added notes column")
+                        
+                        conn.commit()
+                    print("🎉 Participation fields migration completed!")
+                else:
+                    print("✅ Participation fields already exist")
+        except Exception as e:
+            print(f"⚠️ Migration error (safe to ignore): {e}")
+    
+    # Run auto migration if environment variable is set
+    if os.getenv('AUTO_MIGRATE', 'false').lower() == 'true':
+        add_missing_columns()
+    
 
     # ------------------- Register blueprints -------------------
     from app.routes.profile import profile_bp
