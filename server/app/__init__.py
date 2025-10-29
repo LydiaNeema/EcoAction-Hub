@@ -111,6 +111,14 @@ def create_app():
     except Exception as e:
         print(f"✗ Admin blueprint registration failed: {e}")
     
+    # Register upload routes
+    try:
+        from app.routes import upload
+        app.register_blueprint(upload.bp)
+        print("✓ Upload blueprint registered successfully")
+    except Exception as e:
+        print(f"✗ Upload blueprint registration failed: {e}")
+    
     # ------------------- Default route -------------------
     @app.route("/")
     def home():

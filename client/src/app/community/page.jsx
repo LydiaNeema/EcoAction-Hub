@@ -2,13 +2,14 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from '@/components/Navbar';
-import { Search, MapPin, Clock, Leaf, X, Upload } from "lucide-react";
+import { Search, MapPin, Clock, Leaf, X, Upload, Edit3 } from "lucide-react";
 import communityService from '@/services/communityService';
+import uploadService from '@/services/uploadService';
 import { getToken } from '@/utils/auth';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Page() {
-  const { refreshUser } = useAuth();
+  const { refreshUser, user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All categories");
   const [joinedActions, setJoinedActions] = useState(new Set());
@@ -23,6 +24,8 @@ export default function Page() {
   });
   const [itemsToShow, setItemsToShow] = useState(3);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingAction, setEditingAction] = useState(null);
 
   const categories = ["All categories", "Environment", "Agriculture", "Conservation", "Education"];
 
@@ -223,6 +226,25 @@ export default function Page() {
     }
   };
 
+  const handleEditAction = (action) => {
+    setEditingAction(action);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateAction = async (formData) => {
+    try {
+      await communityService.updateAction(editingAction.id, formData);
+      setShowEditModal(false);
+      setEditingAction(null);
+      // Refresh the actions list
+      fetchActions();
+      fetchStats();
+      alert('✅ Your community action has been updated successfully!');
+    } catch (err) {
+      alert(err.message || 'Failed to update action. Please try again.');
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -346,7 +368,7 @@ export default function Page() {
                     {/* Image */}
                     <div className="aspect-video relative overflow-hidden">
                       <Image
-                        src={action.image || "/CommunityTreeplanting.jpeg"}
+                        src={uploadService.getImageUrl(action.image)}
                         alt={action.title}
                         width={400}
                         height={250}
@@ -384,22 +406,36 @@ export default function Page() {
                         <span>{action.participants_count || 0} participants • {action.impact_metric || "Making an impact"}</span>
                       </div>
 
-                      {/* Join Button - Fully Functional */}
-                      {isJoined ? (
-                        <button 
-                          onClick={() => handleLeaveAction(action.id)}
-                          className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                        >
-                          LEAVE ACTION
-                        </button>
-                      ) : (
-                        <button 
-                          onClick={() => handleJoinAction(action.id)}
-                          className="w-full bg-[#16A34A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#15803D] transition-colors"
-                        >
-                          JOIN ACTION
-                        </button>
-                      )}
+                      {/* Action Buttons */}
+                      <div className="space-y-2">
+                        {/* Edit Button - Only show if user created this action */}
+                        {user && action.created_by === user.id && (
+                          <button 
+                            onClick={() => handleEditAction(action)}
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                            EDIT ACTION
+                          </button>
+                        )}
+                        
+                        {/* Join/Leave Button */}
+                        {isJoined ? (
+                          <button 
+                            onClick={() => handleLeaveAction(action.id)}
+                            className="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                          >
+                            LEAVE ACTION
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleJoinAction(action.id)}
+                            className="w-full bg-[#16A34A] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#15803D] transition-colors"
+                          >
+                            JOIN ACTION
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -429,6 +465,18 @@ export default function Page() {
           onCreate={handleCreateAction}
         />
       )}
+
+      {/* Edit Action Modal */}
+      {showEditModal && editingAction && (
+        <EditActionModal 
+          action={editingAction}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingAction(null);
+          }} 
+          onUpdate={handleUpdateAction}
+        />
+      )}
     </div>
   );
 }
@@ -446,18 +494,47 @@ function CreateActionModal({ onClose, onCreate }) {
   });
   const [submitting, setSubmitting] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setUploadedImage(file);
-      // Create a URL for preview and set it in formData
-      const imageUrl = URL.createObjectURL(file);
-      setFormData({...formData, image: imageUrl});
+      try {
+        setUploading(true);
+        
+        // Upload the file to the server
+        const uploadResult = await uploadService.uploadImage(file);
+        
+        // Set the uploaded image data
+        setUploadedImage({
+          file: file,
+          url: uploadResult.image_url,
+          filename: uploadResult.filename
+        });
+        
+        // Update form data with the server URL
+        setFormData({...formData, image: uploadResult.image_url});
+        
+      } catch (error) {
+        alert(`Image upload failed: ${error.message}`);
+        console.error('Upload error:', error);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
-  const removeUploadedImage = () => {
+  const removeUploadedImage = async () => {
+    if (uploadedImage && uploadedImage.filename) {
+      try {
+        // Delete the uploaded file from server
+        await uploadService.deleteImage(uploadedImage.filename);
+      } catch (error) {
+        console.error('Failed to delete image:', error);
+        // Continue anyway - user can still remove from form
+      }
+    }
+    
     setUploadedImage(null);
     setFormData({...formData, image: ''});
   };
@@ -613,13 +690,22 @@ function CreateActionModal({ onClose, onCreate }) {
                     onChange={(e) => setFormData({...formData, image: e.target.value})}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="https://example.com/image.jpg or /image.jpg"
+                    disabled={uploading}
                   />
                   <label
                     htmlFor="community-image-upload"
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
-                    title="Upload image"
+                    className={`px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 cursor-pointer transition-colors ${
+                      uploading 
+                        ? 'bg-gray-100 cursor-not-allowed' 
+                        : 'hover:bg-gray-50'
+                    }`}
+                    title={uploading ? "Uploading..." : "Upload image"}
                   >
-                    <Upload className="w-4 h-4" />
+                    {uploading ? (
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
                   </label>
                   <input
                     id="community-image-upload"
@@ -627,15 +713,18 @@ function CreateActionModal({ onClose, onCreate }) {
                     accept="image/*"
                     onChange={handleImageUpload}
                     className="hidden"
+                    disabled={uploading}
                   />
                 </div>
-                <p className="text-xs text-gray-500">Enter an image URL or upload a file</p>
+                <p className="text-xs text-gray-500">
+                  {uploading ? 'Uploading image...' : 'Enter an image URL or upload a file (max 5MB)'}
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
                 <div className="relative inline-block">
                   <img
-                    src={formData.image}
+                    src={uploadedImage.url || formData.image}
                     alt="Uploaded preview"
                     className="w-32 h-24 object-cover rounded-lg border border-gray-200"
                   />
@@ -643,6 +732,7 @@ function CreateActionModal({ onClose, onCreate }) {
                     type="button"
                     onClick={removeUploadedImage}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    title="Remove image"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -695,6 +785,318 @@ function CreateActionModal({ onClose, onCreate }) {
               className="flex-1 px-6 py-3 bg-[#16A34A] text-white rounded-lg font-medium hover:bg-[#15803D] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? 'Creating...' : 'Create Action'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Edit Action Modal Component
+function EditActionModal({ action, onClose, onUpdate }) {
+  const [formData, setFormData] = useState({
+    title: action.title || '',
+    description: action.description || '',
+    category: action.category || 'Environment',
+    location: action.location || '',
+    date: action.date ? new Date(action.date).toISOString().slice(0, 16) : '',
+    image: action.image || '',
+    impact_metric: action.impact_metric || ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        setUploading(true);
+        
+        // Upload the file to the server
+        const uploadResult = await uploadService.uploadImage(file);
+        
+        // Set the uploaded image data
+        setUploadedImage({
+          file: file,
+          url: uploadResult.image_url,
+          filename: uploadResult.filename
+        });
+        
+        // Update form data with the server URL
+        setFormData({...formData, image: uploadResult.image_url});
+        
+      } catch (error) {
+        alert(`Image upload failed: ${error.message}`);
+        console.error('Upload error:', error);
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  const removeUploadedImage = async () => {
+    if (uploadedImage && uploadedImage.filename) {
+      try {
+        // Delete the uploaded file from server
+        await uploadService.deleteImage(uploadedImage.filename);
+      } catch (error) {
+        console.error('Failed to delete image:', error);
+        // Continue anyway - user can still remove from form
+      }
+    }
+    
+    setUploadedImage(null);
+    setFormData({...formData, image: ''});
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    const requiredFields = [
+      { field: 'title', name: 'Action Title' },
+      { field: 'description', name: 'Description' },
+      { field: 'category', name: 'Category' },
+      { field: 'location', name: 'Location' },
+      { field: 'date', name: 'Date & Time' }
+    ];
+    
+    for (const { field, name } of requiredFields) {
+      if (!formData[field] || formData[field].trim() === '') {
+        alert(`Please fill in the ${name} field. All required fields must be completed.`);
+        return;
+      }
+    }
+    
+    // Validate date is in the future
+    const selectedDate = new Date(formData.date);
+    const now = new Date();
+    if (selectedDate <= now) {
+      alert('Please select a future date and time for your action.');
+      return;
+    }
+    
+    // Validate title length
+    if (formData.title.trim().length < 3) {
+      alert('Action title must be at least 3 characters long.');
+      return;
+    }
+    
+    // Validate description length
+    if (formData.description.trim().length < 10) {
+      alert('Description must be at least 10 characters long to provide enough detail.');
+      return;
+    }
+    
+    setSubmitting(true);
+    try {
+      await onUpdate(formData);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">Edit Action</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Action Title *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g., Tree Planting Event"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <textarea
+              required
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={4}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Describe your community action in detail..."
+            />
+          </div>
+
+          {/* Category and Date */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                required
+                value={formData.category}
+                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="Environment">Environment</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Conservation">Conservation</option>
+                <option value="Education">Education</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Date & Time *
+              </label>
+              <input
+                type="datetime-local"
+                required
+                value={formData.date}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Location *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.location}
+              onChange={(e) => setFormData({...formData, location: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g., Riverside Park, San Francisco"
+            />
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Action Image (Optional)
+            </label>
+            
+            {!uploadedImage ? (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={formData.image}
+                    onChange={(e) => setFormData({...formData, image: e.target.value})}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="https://example.com/image.jpg or /image.jpg"
+                    disabled={uploading}
+                  />
+                  <label
+                    htmlFor="edit-image-upload"
+                    className={`px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2 cursor-pointer transition-colors ${
+                      uploading 
+                        ? 'bg-gray-100 cursor-not-allowed' 
+                        : 'hover:bg-gray-50'
+                    }`}
+                    title={uploading ? "Uploading..." : "Upload image"}
+                  >
+                    {uploading ? (
+                      <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </label>
+                  <input
+                    id="edit-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  {uploading ? 'Uploading image...' : 'Enter an image URL or upload a file (max 5MB)'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative inline-block">
+                  <img
+                    src={uploadedImage.url || formData.image}
+                    alt="Uploaded preview"
+                    className="w-32 h-24 object-cover rounded-lg border border-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeUploadedImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    title="Remove image"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <label
+                    htmlFor="edit-image-upload-replace"
+                    className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer font-medium"
+                  >
+                    Replace Image
+                  </label>
+                  <input
+                    id="edit-image-upload-replace"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Impact Metric */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Expected Impact
+            </label>
+            <input
+              type="text"
+              value={formData.impact_metric}
+              onChange={(e) => setFormData({...formData, impact_metric: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g., 100 trees planted, 50 tons CO2/year"
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Updating...' : 'Update Action'}
             </button>
           </div>
         </form>
