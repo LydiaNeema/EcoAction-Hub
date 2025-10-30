@@ -6,33 +6,7 @@ A comprehensive platform connecting communities to solve local climate challenge
 
 - **Frontend**: [https://eco-action-hub-puce.vercel.app](https://eco-action-hub-puce.vercel.app)
 - **Backend API**: [https://ecoaction-hub.onrender.com](https://ecoaction-hub.onrender.com)
-- **API Documentation**: [https://ecoaction-hub.onrender.com/api/docs/](https://ecoaction-hub.onrender.com/api/docs/)
-
-## API Documentation
-
-The EcoAction Hub API provides comprehensive Swagger/OpenAPI documentation:
-
-### Interactive Swagger UI
-- **Live Documentation**: [https://ecoaction-hub.onrender.com/api/docs/](https://ecoaction-hub.onrender.com/api/docs/)
-- **Development**: [http://localhost:5000/api/docs/](http://localhost:5000/api/docs/)
-
-### OpenAPI Specification
-- **YAML File**: [`server/openapi.yaml`](server/openapi.yaml) - Complete API specification
-- **JSON Export**: Available via Swagger UI "Download" button
-
-### Key Features
-- **Interactive Testing**: Try API endpoints directly from the documentation
-- **Authentication**: JWT token support with bearer authentication
-- **Request/Response Models**: Detailed schema definitions
-- **Error Handling**: Comprehensive error response documentation
-- **Parameter Validation**: Request parameter examples and constraints
-
-### API Endpoints Overview
-- **Authentication**: Register, login, user profile
-- **Community Actions**: CRUD operations, join/leave actions
-- **Emergency Management**: Alerts, reports, contacts, AI insights
-- **File Upload**: Image upload, serving, and deletion
-- **User Profile**: Profile management and statistics
+- **API Documentation (Swagger)**: [https://ecoaction-hub.onrender.com/api/docs](https://ecoaction-hub.onrender.com/api/docs)
 
 ## Project Overview
 
