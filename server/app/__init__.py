@@ -152,6 +152,14 @@ def create_app():
     except Exception as e:
         print(f"✗ Upload blueprint registration failed: {e}")
     
+    # Register API documentation
+    try:
+        from api_docs import api_docs_bp
+        app.register_blueprint(api_docs_bp)
+        print("✓ API documentation registered successfully")
+    except Exception as e:
+        print(f"✗ API documentation registration failed: {e}")
+    
     # ------------------- Default route -------------------
     @app.route("/")
     def home():
@@ -171,7 +179,8 @@ def create_app():
                 'community_actions': '/api/community/actions',
                 'community_stats': '/api/community/stats',
                 'contact_messages': '/api/contact/messages',
-                'upload_image': '/api/upload/image'
+                'upload_image': '/api/upload/image',
+                'api_docs': '/api/docs/'
             }
         }), 200
     return app
