@@ -6,7 +6,7 @@ A comprehensive platform connecting communities to solve local climate challenge
 
 - **Frontend**: [https://eco-action-hub-puce.vercel.app](https://eco-action-hub-puce.vercel.app)
 - **Backend API**: [https://ecoaction-hub.onrender.com](https://ecoaction-hub.onrender.com)
-- **API Documentation (Swagger)**: [https://ecoaction-hub.onrender.com/api/docs](https://ecoaction-hub.onrender.com/api/docs)
+- **API Documentation**: See [SWAGGER.md](./SWAGGER.md) for complete API documentation
 
 ## Project Overview
 
@@ -52,14 +52,18 @@ EcoAction Hub enables communities to respond effectively to climate emergencies 
 - **File Storage**: Local filesystem (expandable to CDN)
 - **Environment**: Production/Development configs
 
-## API Endpoints
+## API Documentation
 
-### Authentication
+Complete API documentation with request/response examples, authentication details, and data models is available in [SWAGGER.md](./SWAGGER.md).
+
+### Quick Reference - Main Endpoints
+
+**Authentication**
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/auth/me` - Get current user info
 
-### Community Actions
+**Community Actions**
 - `GET /api/community/actions` - List all actions
 - `POST /api/community/actions` - Create new action
 - `PUT /api/community/actions/<id>` - Update action (creator only)
@@ -68,20 +72,22 @@ EcoAction Hub enables communities to respond effectively to climate emergencies 
 - `POST /api/community/actions/<id>/leave` - Leave action
 - `GET /api/community/my-actions` - Get user's joined actions
 
-### Emergency Management
+**Emergency Management**
 - `GET /api/emergency/alerts` - List emergency alerts
 - `POST /api/emergency/reports` - Submit emergency report
 - `GET /api/emergency/contacts` - Get emergency contacts
 - `GET /api/emergency/insights` - Get AI insights
 
-### File Upload
+**File Upload**
 - `POST /api/upload/image` - Upload image file
 - `GET /api/upload/images/<filename>` - Serve uploaded image
 - `DELETE /api/upload/images/<filename>` - Delete image (owner only)
 
-### User Profile
+**User Profile**
 - `GET /api/profile` - Get user profile
 - `PUT /api/profile` - Update profile
+
+For detailed documentation including request/response examples, see [SWAGGER.md](./SWAGGER.md)
 
 ## Project Structure
 

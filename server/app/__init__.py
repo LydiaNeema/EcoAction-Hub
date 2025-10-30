@@ -1,9 +1,9 @@
 import os
 from flask import Flask, jsonify
 from flask_cors import CORS
-from flasgger import Swagger
-from .extensions import db, migrate, api, bcrypt, jwt
 from flask_jwt_extended import JWTManager
+
+from .extensions import db, migrate, api, bcrypt
 from .config import DevelopmentConfig, ProductionConfig
 
 
@@ -45,48 +45,6 @@ def create_app():
             "supports_credentials": True
         }
     })
-    
-    # ------------------- Swagger API Documentation -------------------
-    swagger_config = {
-        "headers": [],
-        "specs": [
-            {
-                "endpoint": 'apispec',
-                "route": '/apispec.json',
-                "rule_filter": lambda rule: True,
-                "model_filter": lambda tag: True,
-            }
-        ],
-        "static_url_path": "/flasgger_static",
-        "swagger_ui": True,
-        "specs_route": "/api/docs"
-    }
-    
-    swagger_template = {
-        "swagger": "2.0",
-        "info": {
-            "title": "EcoAction Hub API",
-            "description": "API documentation for EcoAction Hub - A platform for community-driven climate action and emergency response",
-            "version": "1.0.0",
-            "contact": {
-                "name": "EcoAction Hub Team",
-                "url": "https://eco-action-hub-puce.vercel.app"
-            }
-        },
-        "host": os.getenv('API_HOST', 'localhost:5000'),
-        "basePath": "/",
-        "schemes": ["https", "http"],
-        "securityDefinitions": {
-            "Bearer": {
-                "type": "apiKey",
-                "name": "Authorization",
-                "in": "header",
-                "description": "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
-            }
-        }
-    }
-    
-    swagger = Swagger(app, config=swagger_config, template=swagger_template)
 
     # ------------------- Import models (for Alembic) -------------------
     from app.models.profile import Profile
